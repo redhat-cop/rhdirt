@@ -1,0 +1,116 @@
+apiVersion: hive.openshift.io/v1
+kind: ClusterDeployment
+metadata:
+  name: '{{ cluster_name }}'
+  namespace: '{{ cluster_name }}'
+  labels:
+    cloud: 'AWS'
+    region: 'us-east-1'
+    vendor: OpenShift
+    cluster.open-cluster-management.io/clusterset: 'default'
+spec:
+  baseDomain: dragonslair.dev
+  clusterName: '{{ cluster_name }}'
+  controlPlaneConfig:
+    servingCertificates: {}
+  installAttemptsLimit: 1
+  installed: false
+  platform:
+    aws:
+      credentialsSecretRef:
+        name: {{ cluster_name }}-aws-creds
+      region: us-east-1
+  provisioning:
+    installConfigSecretRef:
+      name: {{ cluster_name }}-install-config
+    sshPrivateKeySecretRef:
+      name: {{ cluster_name }}-ssh-private-key
+    imageSetRef:
+       #quay.io/openshift-release-dev/ocp-release:4.10.38-x86_64
+      name: img4.10.38-x86-64-appsub
+  pullSecretRef:
+    name: {{ cluster_name }}-pull-secret
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  labels:
+    cloud: Amazon
+    region: us-east-1
+    name: '{{ cluster_name }}'
+    vendor: OpenShift
+    cluster.open-cluster-management.io/clusterset: 'default'
+  name: '{{ cluster_name }}'
+spec:
+  hubAcceptsClient: true
+---
+apiVersion: hive.openshift.io/v1
+kind: MachinePool
+metadata:
+  name: {{ cluster_name }}-worker
+  namespace: '{{ cluster_name }}'
+spec:
+  clusterDeploymentRef:
+    name: '{{ cluster_name }}'
+  name: worker
+  platform:
+    aws:
+      rootVolume:
+        iops: 2000
+        size: 100
+        type: io1
+      type: m5.xlarge
+  replicas: 3
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ cluster_name }}-pull-secret
+  namespace: '{{ cluster_name }}'
+stringData:
+  .dockerconfigjson: |-
+    {{ pull_secret }}
+type: kubernetes.io/dockerconfigjson
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ cluster_name }}-ssh-private-key
+  namespace: '{{ cluster_name }}'
+stringData:
+  ssh-privatekey: |-
+    {{ ssh_private_key | indent(width=4) }}
+type: Opaque
+---
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: {{ cluster_name }}-aws-creds
+  namespace: '{{ cluster_name }}'
+stringData:
+  aws_access_key_id: {{ aws_access_key_id }}
+  aws_secret_access_key: {{ aws_secret_access_key }}
+---
+apiVersion: agent.open-cluster-management.io/v1
+kind: KlusterletAddonConfig
+metadata:
+  name: '{{ cluster_name }}'
+  namespace: '{{ cluster_name }}'
+spec:
+  clusterName: '{{ cluster_name }}'
+  clusterNamespace: '{{ cluster_name }}'
+  clusterLabels:
+    cloud: Amazon
+    vendor: OpenShift
+  applicationManager:
+    enabled: true
+  policyController:
+    enabled: true
+  searchCollector:
+    enabled: true
+  certPolicyController:
+    enabled: true
+  iamPolicyController:
+    enabled: true
+  proxyConfig: {}

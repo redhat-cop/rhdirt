@@ -1,0 +1,15 @@
+- name: Login with openshift
+  shell:
+    cmd: oc login --token="{{ openshift_service_account }}" --server="{{ openshift_server }}"
+
+- name: Navigate to ansible-automation-platform namespace
+  shell:
+    cmd: oc project ansible-automation-platform
+
+- name: Remove cluster from ACM
+  shell:
+    cmd: oc delete clusterdeployment.hive.openshift.io/"{{ cluster_name }}"
+  
+- name: Delete project "{{ cluster_name }}""
+  shell:
+    cmd: oc delete project "{{ cluster_name }}"

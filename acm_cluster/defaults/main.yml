@@ -1,0 +1,5 @@
+# set boolean to yes to install, no to uninstall
+acm_create: yes
+
+# set boolean to yes to delete, no when creating cluster
+acm_remove: no
