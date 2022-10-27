@@ -1,5 +1,5 @@
 ---
-- name: Template ACM resorces 
+- name: Template ACM resources 
   template:
     src: "acm-cluster-create.yaml.j2"
     dest: "acm-cluster-create.yaml"
