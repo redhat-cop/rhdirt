@@ -39,6 +39,42 @@
   k8s:
     definition: "{{ lookup('kubernetes.core.kustomize', dir='acm_cluster/files/rhsso-operator/base') }}"  
 
-# - name: Create secret from the install-config template
-#   shell:
-#     cmd: sleep 1000
+- name: Create Keycloak Realm
+  k8s:
+    state: present
+    name: openshift-realm
+    definition:
+      kind: KeycloakRealm
+      apiVersion: keycloak.org/v1alpha1
+      spec:
+				instanceSelector:
+				matchLabels:
+					app: sso
+				realm:
+					clients:
+						- enabled: true
+							clientAuthenticatorType: client-secret
+							redirectUris:
+								- >-
+									"{{ keycloak_redirect_id }}"
+							clientId: openshift
+							implicitFlowEnabled: false
+							secret: "{{ keycloak_client_secret }}"
+							publicClient: false
+							standardFlowEnabled: true
+							directAccessGrantsEnabled: false
+					displayName: openshift
+					enabled: true
+					id: openshift
+					identityProviders:
+						- alias: github
+							config:
+								clientId: "{{ oauth_client_id }}"
+								clientSecret: "{{ oauth_client_secret }}"
+								syncMode: IMPORT
+								useJwksUrl: 'true'
+							enabled: true
+							firstBrokerLoginFlowAlias: first broker login
+							providerId: github
+					realm: openshift
+
