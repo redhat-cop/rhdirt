@@ -89,8 +89,8 @@
       apiVersion: keycloak.org/v1alpha1
       spec:
         instanceSelector:
-        matchLabels:
-          app: sso
+          matchLabels:
+            app: sso
         realm:
           clients:
             - enabled: true
