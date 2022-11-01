@@ -125,7 +125,7 @@
     definition:
       apiVersion: v1
       data:
-        clientSecret: {{ keycloak_client_secret }}
+        clientSecret: "{{ keycloak_client_secret | b64encode }}"
       kind: Secret
       metadata:
         name: openid-client-secret
