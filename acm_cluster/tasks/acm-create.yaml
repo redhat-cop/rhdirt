@@ -46,10 +46,10 @@
     name: rhsso-operator
     namespace: sso
     wait_timeout: 3
-    wait_conditon:
+    wait_condition:
       type: CatalogSourcesUnhealthy
-      status: false
-      
+      status: False
+
 - name: Create Keycloak Realm
   k8s:
     state: present
