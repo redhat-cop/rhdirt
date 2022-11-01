@@ -57,6 +57,24 @@
     name: openshift-realm
     namespace: sso
     definition:
+      kind: Keycloak
+      apiVersion: keycloak.org/v1alpha1
+      metadata:
+        name: "{{ cluster_name }}-keycloak"
+        labels:
+          app: sso
+        namespace: sso
+      spec:
+        instances: 1
+        externalAccess:
+          enabled: true
+
+- name: Create Keycloak Realm
+  k8s:
+    state: present
+    name: openshift-realm
+    namespace: sso
+    definition:
       kind: KeycloakRealm
       apiVersion: keycloak.org/v1alpha1
       spec:
@@ -69,7 +87,7 @@
               clientAuthenticatorType: client-secret
               redirectUris:
                 - >-
-                  "https://oauth-openshift.apps."{{ cluster_name }}".dragonslair.dev/oauth2callback/myapp"
+                  https://oauth-openshift.apps.{{ cluster_name }}.dragonslair.dev/oauth2callback/myapp
               clientId: openshift
               implicitFlowEnabled: false
               secret: "{{ keycloak_client_secret }}"
