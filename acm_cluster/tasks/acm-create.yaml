@@ -39,7 +39,7 @@
   k8s:
     definition: "{{ lookup('kubernetes.core.kustomize', dir='acm_cluster/files/rhsso-operator/base') }}"  
 
-- name: Wait until the Subscription is created
+- name: Wait until the Operator is ready
   k8s_info:
     kind: Subscription
     api_version: operators.coreos.com/v1alpha1
@@ -50,7 +50,7 @@
       type: CatalogSourcesUnhealthy
       status: False
 
-- name: Create Keycloak Instance
+- name: Create Keycloak instance
   k8s:
     state: present
     name: keycloak_instance
@@ -68,7 +68,7 @@
         externalAccess:
           enabled: true
 
-- name: Wait until Keycloak is ready to create a Realm
+- name: Wait until Keycloak is ready 
   k8s_info:
     kind: Pod
     api_version: v1
@@ -119,3 +119,27 @@
               providerId: github
           realm: openshift
 
+- name: Create secret from Keycloak Client
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      data:
+        clientSecret: "{{ keycloak_client_secret }}"
+      kind: Secret
+      metadata:
+        name: openid-client-secret
+        namespace: openshift-config
+      type: Opaque
+
+- name: Get tls.crt from router-ca
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Secret
+    name: router-ca
+    namespace: openshift-ingress-operator
+  register: tls_crt
+
+- name: debug
+  debug:
+    var: tls_crt
