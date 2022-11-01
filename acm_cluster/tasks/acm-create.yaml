@@ -71,7 +71,7 @@
 - name: Wait until Keycloak is ready to create a Realm
   k8s_info:
     kind: Pod
-    api_version: operators.coreos.com/v1alpha1
+    api_version: v1
     wait: yes
     name: keycloak-0
     namespace: sso
