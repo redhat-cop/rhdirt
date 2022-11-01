@@ -41,7 +41,8 @@
 
 - name: Wait till the Subscription is created
   kubernetes.core.k8s_info:
-    kind: Sub
+    kind: Subscription
+    api_version: operators.coreos.com/v1alpha1
     wait: yes
     name: rhsso-operator
     namespace: sso
@@ -54,6 +55,7 @@
   k8s:
     state: present
     name: openshift-realm
+    namespace: sso
     definition:
       kind: KeycloakRealm
       apiVersion: keycloak.org/v1alpha1
