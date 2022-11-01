@@ -36,5 +36,5 @@
       
   - name: Get a list of all pods from any namespace
     k8s_info:
-      kind: Pod
+      kind: Secret
   
