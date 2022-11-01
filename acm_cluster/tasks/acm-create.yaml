@@ -39,6 +39,17 @@
   k8s:
     definition: "{{ lookup('kubernetes.core.kustomize', dir='acm_cluster/files/rhsso-operator/base') }}"  
 
+- name: Wait till the Subscription is created
+  kubernetes.core.k8s_info:
+    kind: Sub
+    wait: yes
+    name: rhsso-operator
+    namespace: sso
+    wait_timeout: 3
+    wait_conditon:
+      type: CatalogSourcesUnhealthy
+      status: false
+      
 - name: Create Keycloak Realm
   k8s:
     state: present
