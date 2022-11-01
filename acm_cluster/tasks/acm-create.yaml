@@ -33,10 +33,6 @@
 # - name: Create cluster resources for ACM
 #   shell:
 #     cmd: oc apply -f acm-cluster-create.yaml
-
-  - name:
-    shell:
-      cmd: sleep 10000
       
   - name: Get a list of all pods from any namespace
     k8s_info:
