@@ -34,12 +34,7 @@
 #   shell:
 #     cmd: oc apply -f acm-cluster-create.yaml
       
-  - name: Get a list of all secrets from any namespace
-    k8s_info:
-      kind: Secret
-    register: secret_list
 
-  - name: debug secrets
-    debug:
-      var: secret_list
-  
+- name: Install RHSSO Operator
+  k8s:
+    definition: "{{ lookup('kubernetes.core.kustomize', dir='files/rhsso-operator/base') }}  
