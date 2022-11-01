@@ -67,6 +67,7 @@
         instances: 1
         externalAccess:
           enabled: true
+    wait_timeout: 60      
     wait_condition:
       type: ready
       status: true
