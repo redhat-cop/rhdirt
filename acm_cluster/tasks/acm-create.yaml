@@ -39,8 +39,8 @@
   k8s:
     definition: "{{ lookup('kubernetes.core.kustomize', dir='acm_cluster/files/rhsso-operator/base') }}"  
 
-- name: Wait till the Subscription is created
-  kubernetes.core.k8s_info:
+- name: Wait until the Subscription is created
+  k8s_info:
     kind: Subscription
     api_version: operators.coreos.com/v1alpha1
     wait: yes
@@ -48,13 +48,13 @@
     namespace: sso
     wait_timeout: 3
     wait_condition:
-      type: CatalogSourcesUnhealthy
-      status: False
+      type: ready
+      status: true
 
-- name: Create Keycloak Realm
+- name: Create Keycloak Instance
   k8s:
     state: present
-    name: openshift-realm
+    name: keycloak_instance
     namespace: sso
     definition:
       kind: Keycloak
@@ -68,6 +68,8 @@
         instances: 1
         externalAccess:
           enabled: true
+    wait_condition:
+      type: CatalogSourcesUnhealthy
 
 - name: Create Keycloak Realm
   k8s:
