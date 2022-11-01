@@ -47,34 +47,35 @@
       kind: KeycloakRealm
       apiVersion: keycloak.org/v1alpha1
       spec:
-				instanceSelector:
-				matchLabels:
-					app: sso
-				realm:
-					clients:
-						- enabled: true
-							clientAuthenticatorType: client-secret
-							redirectUris:
-								- >-
-									"{{ keycloak_redirect_id }}"
-							clientId: openshift
-							implicitFlowEnabled: false
-							secret: "{{ keycloak_client_secret }}"
-							publicClient: false
-							standardFlowEnabled: true
-							directAccessGrantsEnabled: false
-					displayName: openshift
-					enabled: true
-					id: openshift
-					identityProviders:
-						- alias: github
-							config:
-								clientId: "{{ oauth_client_id }}"
-								clientSecret: "{{ oauth_client_secret }}"
-								syncMode: IMPORT
-								useJwksUrl: 'true'
-							enabled: true
-							firstBrokerLoginFlowAlias: first broker login
-							providerId: github
-					realm: openshift
-
+        instanceSelector:
+          matchLabels:
+            app: sso
+        realm:
+          clients:
+            - enabled: true
+              clientAuthenticatorType: client-secret
+              redirectUris:
+                - >-
+                  https://oauth-openshift.apps.dirt-hackathon.dragonslair.dev/oauth2callback/myapp
+              clientId: openshift
+              implicitFlowEnabled: false
+              secret: 84f837f9-8567-4ade-9c18-ad90ce856757
+              publicClient: false
+              standardFlowEnabled: true
+              id: 9eae225c-612a-4d20-bffe-c686a3e141e3
+              directAccessGrantsEnabled: false
+          displayName: openshift
+          enabled: true
+          id: openshift
+          identityProviders:
+            - alias: github
+              config:
+                clientId: 94127f2b163806f210ad
+                clientSecret: fc5984081787587a2864ff9e414b4b252741e29d
+                syncMode: IMPORT
+                useJwksUrl: 'true'
+              enabled: true
+              firstBrokerLoginFlowAlias: first broker login
+              internalId: e4f88909-858c-4a84-a3c3-e28d72528d5b
+              providerId: github
+          realm: openshift
