@@ -34,7 +34,12 @@
 #   shell:
 #     cmd: oc apply -f acm-cluster-create.yaml
       
-  - name: Get a list of all pods from any namespace
+  - name: Get a list of all secrets from any namespace
     k8s_info:
       kind: Secret
+    register: secret_list
+
+  - name: debug secrets
+    debug:
+      var: secret_list
   
