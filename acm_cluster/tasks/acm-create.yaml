@@ -120,12 +120,12 @@
           realm: openshift
 
 - name: Create secret from Keycloak Client
-  kubernetes.core.k8s:
+  k8s:
     state: present
     definition:
       apiVersion: v1
       data:
-        clientSecret: "{{ keycloak_client_secret }}"
+        clientSecret: {{ keycloak_client_secret }}
       kind: Secret
       metadata:
         name: openid-client-secret
@@ -133,7 +133,7 @@
       type: Opaque
 
 - name: Get tls.crt from router-ca
-  kubernetes.core.k8s_info:
+  k8s_info:
     api_version: v1
     kind: Secret
     name: router-ca
