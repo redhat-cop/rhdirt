@@ -46,7 +46,6 @@
     wait: yes
     name: rhsso-operator
     namespace: sso
-    wait_timeout: 3
     wait_condition:
       type: ready
       status: true
