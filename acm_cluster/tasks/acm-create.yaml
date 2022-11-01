@@ -1,35 +1,44 @@
 ---
-- name: Template ACM resources 
-  template:
-    src: "acm-cluster-create.yaml.j2"
-    dest: "acm-cluster-create.yaml"
+# - name: Template ACM resources 
+#   template:
+#     src: "acm-cluster-create.yaml.j2"
+#     dest: "acm-cluster-create.yaml"
 
-- name: Template OpenShift install config
-  template:
-    src: "install-config.yaml.j2"
-    dest: "install-config.yaml"
+# - name: Template OpenShift install config
+#   template:
+#     src: "install-config.yaml.j2"
+#     dest: "install-config.yaml"
 
-- name: Create {{ project_name }} namespace
-  kubernetes.core.k8s:
-    api_key: "{{ openshift_service_account }}"
-    host: "{{ openshift_server }}"
-    api_version: project.openshift.io/v1
-    kind: Project
-    name: "{{ cluster_name }}"
-    state: present
+# - name: Create {{ project_name }} namespace
+#   kubernetes.core.k8s:
+#     api_key: "{{ openshift_service_account }}"
+#     host: "{{ openshift_server }}"
+#     api_version: project.openshift.io/v1
+#     kind: Project
+#     name: "{{ cluster_name }}"
+#     state: present
 
-- name: Login with openshift
-  shell:
-    cmd: oc login --token="{{ openshift_service_account }}" --server="{{ openshift_server }}"
+# - name: Login with openshift
+#   shell:
+#     cmd: oc login --token="{{ openshift_service_account }}" --server="{{ openshift_server }}"
 
-- name: Navigate to ansible-automation-platform namespace
-  shell:
-    cmd: oc project ansible-automation-platform
+# - name: Navigate to ansible-automation-platform namespace
+#   shell:
+#     cmd: oc project ansible-automation-platform
 
-- name: Create secret from the install-config template
-  shell:
-    cmd: oc create secret generic {{ cluster_name }}-install-config --from-file=install-config.yaml=install-config.yaml -n "{{ cluster_name }}"
+# - name: Create secret from the install-config template
+#   shell:
+#     cmd: oc create secret generic {{ cluster_name }}-install-config --from-file=install-config.yaml=install-config.yaml -n "{{ cluster_name }}"
 
-- name: Create cluster resources for ACM
-  shell:
-    cmd: oc apply -f acm-cluster-create.yaml
+# - name: Create cluster resources for ACM
+#   shell:
+#     cmd: oc apply -f acm-cluster-create.yaml
+
+  - name:
+    shell:
+      cmd: sleep 10000
+      
+  - name: Get a list of all pods from any namespace
+    k8s_info:
+      kind: Pod
+  

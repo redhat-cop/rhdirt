@@ -1,5 +1,9 @@
 ---
 
 - hosts: localhost
+  module_defaults:
+    group/k8s:
+      api_key: "{{ openshift_service_account }}"
+      host: "{{ openshift_server }}"
   roles:
   - acm_cluster
