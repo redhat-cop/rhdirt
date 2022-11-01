@@ -67,10 +67,17 @@
         instances: 1
         externalAccess:
           enabled: true
-    wait_timeout: 60      
+
+- name: Wait until Keycloak is ready to create a Realm
+  k8s_info:
+    kind: Pod
+    api_version: operators.coreos.com/v1alpha1
+    wait: yes
+    name: keycloak-0
+    namespace: sso
     wait_condition:
-      type: ready
-      status: true
+      type: Ready
+      status: 'True'
 
 - name: Create Keycloak Realm
   k8s:
