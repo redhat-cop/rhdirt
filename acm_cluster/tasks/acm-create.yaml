@@ -162,7 +162,7 @@
 
 - name: Get the dockerconfigjson info
   set_fact:
-    secret_string: '{{ data[.\"tls.crt\"] }}'
+    secret_string: '{{ data["tls.crt"] }}'
 
 - name: debug
   debug:
