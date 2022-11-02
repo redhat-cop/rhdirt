@@ -47,7 +47,7 @@
   k8s:
     api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
     host: "{{ managed_cluster_server }}"
-    definition: "{{ lookup('kubernetes.core.kustomize', dir='rhsso_oauth/files/rhsso-operator/base') }}"  
+    definition: "{{ lookup('kubernetes.core.kustomize', dir='cluster-create-aap/roles/rhsso_oauth/files/rhsso-operator/base') }}"  
 
 # - name: Wait until the Operator is ready
 #   k8s_info:
