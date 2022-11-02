@@ -1,5 +1,3 @@
 ---
 
-- import_tasks: managed-cluster-login.yaml
-
 - import_tasks: rhsso-oauth.yaml
