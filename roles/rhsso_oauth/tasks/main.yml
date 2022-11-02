@@ -1,53 +1,57 @@
 ---
 
-- name: Get info from {{ managed_cluster_name }} ClusterDeployment
-  k8s_info:
-    api_key: "{{ acm_hub_service_account }}"
-    host: "{{ acm_hub_server }}"
-    api_version: hive.openshift.io/v1
-    kind: ClusterDeployment
-    name: "{{ managed_cluster_name }}"
-    namespace: "{{ managed_cluster_name }}"
-  register: cluster_deployment_info
+- name: sleep
+  shell:
+    cmd: sleep 1000
 
-- name: Get name of the {{ managed_cluster_name }} admin secret 
-  set_fact:
-    admin_secret_name: "{{ item.spec.clusterMetadata.adminPasswordSecretRef.name }}"
-  with_items: "{{ cluster_deployment_info.resources }}"
+# - name: Get info from {{ managed_cluster_name }} ClusterDeployment
+#   k8s_info:
+#     api_key: "{{ acm_hub_service_account }}"
+#     host: "{{ acm_hub_server }}"
+#     api_version: hive.openshift.io/v1
+#     kind: ClusterDeployment
+#     name: "{{ managed_cluster_name }}"
+#     namespace: "{{ managed_cluster_name }}"
+#   register: cluster_deployment_info
 
-- name: Get "{{ admin_secret_name }}" info
-  k8s_info:
-    api_key: "{{ acm_hub_service_account }}"
-    host: "{{ acm_hub_server }}"
-    api_version: v1
-    kind: Secret
-    name: "{{ admin_secret_name }}"
-    namespace: "{{ managed_cluster_name }}"
-  register: managed_cluster_admin_secret
+# - name: Get name of the {{ managed_cluster_name }} admin secret 
+#   set_fact:
+#     admin_secret_name: "{{ item.spec.clusterMetadata.adminPasswordSecretRef.name }}"
+#   with_items: "{{ cluster_deployment_info.resources }}"
 
-- name: Save the "{{ admin_secret_name }}" password
-  set_fact:
-    managed_cluster_admin_password: "{{ item.data.password | b64decode }}"
-  with_items: "{{ managed_cluster_admin_secret.resources }}"
+# - name: Get "{{ admin_secret_name }}" info
+#   k8s_info:
+#     api_key: "{{ acm_hub_service_account }}"
+#     host: "{{ acm_hub_server }}"
+#     api_version: v1
+#     kind: Secret
+#     name: "{{ admin_secret_name }}"
+#     namespace: "{{ managed_cluster_name }}"
+#   register: managed_cluster_admin_secret
 
-- name: Save name of the {{ managed_cluster_name }} API 
-  set_fact:
-    managed_cluster_server: "{{ item.status.apiURL }}"
-  with_items: "{{ cluster_deployment_info.resources }}"
+# - name: Save the "{{ admin_secret_name }}" password
+#   set_fact:
+#     managed_cluster_admin_password: "{{ item.data.password | b64decode }}"
+#   with_items: "{{ managed_cluster_admin_secret.resources }}"
 
-- name: Log in to "{{ managed_cluster_name }}" (obtain access token)
-  community.okd.openshift_auth:
-    host: "{{ managed_cluster_server }}"
-    username: kubeadmin
-    password: "{{ managed_cluster_admin_password }}"
-    validate_certs: no
-  register: openshift_auth_results
+# - name: Save name of the {{ managed_cluster_name }} API 
+#   set_fact:
+#     managed_cluster_server: "{{ item.status.apiURL }}"
+#   with_items: "{{ cluster_deployment_info.resources }}"
 
-- name: Install RHSSO Operator
-  k8s:
-    api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
-    host: "{{ managed_cluster_server }}"
-    definition: "{{ lookup('kubernetes.core.kustomize', dir='cluster-create-aap/roles/rhsso_oauth/files/rhsso-operator/base') }}"  
+# - name: Log in to "{{ managed_cluster_name }}" (obtain access token)
+#   community.okd.openshift_auth:
+#     host: "{{ managed_cluster_server }}"
+#     username: kubeadmin
+#     password: "{{ managed_cluster_admin_password }}"
+#     validate_certs: no
+#   register: openshift_auth_results
+
+# - name: Install RHSSO Operator
+#   k8s:
+#     api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
+#     host: "{{ managed_cluster_server }}"
+#     definition: "{{ lookup('kubernetes.core.kustomize', dir='cluster-create-aap/roles/rhsso_oauth/files/rhsso-operator/base') }}"  
 
 # - name: Wait until the Operator is ready
 #   k8s_info:
