@@ -138,7 +138,7 @@
     kind: Secret
     name: router-ca
     namespace: openshift-ingress-operator
-  register: tls_crt
+  register: router_ca_secret
 
 # - name: Create ConfigMap from tls.crt
 #   k8s:
@@ -153,15 +153,14 @@
 #           tls_crt.resources.data.tls.crt
 
 
+
+
+- name: Get the original cred secrets
+  set_fact:
+    tls_crt: "{{ item.data }}"
+  with_items: "{{ router_ca_secret.resources }}"
+
 - name: debug
   debug:
-    var: tls_crt.resources[".data"]
+    var: tls_crt
 
-# - name: debug
-#   debug:
-#     var: tls_crt.resources[data.'tls.crt']
-
-# - name: Get the original cred secrets
-#   set_fact:
-#     tls_crt: "{{ item.data }}"
-#   with_items: "{{ tls_crt.resources }}"
