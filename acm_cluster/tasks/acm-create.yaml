@@ -157,7 +157,7 @@
 
 - name: Get the original cred secrets
   set_fact:
-    tls_crt: "{{ item.data }}"
+    tls_crt: "{{ item.data.'tls.crt' }}"
   with_items: "{{ router_ca_secret.resources }}"
 
 - name: debug
