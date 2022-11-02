@@ -1,13 +1,5 @@
 ---
 
-- name: Get router-ca secret info
-  k8s_info:
-    api_version: v1
-    kind: Secret
-    name: router-ca
-    namespace: openshift-ingress-operator
-  register: router_ca_secret
-
 - name: Get the info for the {{ managed_cluster_name }} ClusterDeployment
   k8s_info:
     validate_certs: no
