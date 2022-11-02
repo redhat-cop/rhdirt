@@ -154,7 +154,7 @@
 
 - name: debug
   debug:
-    var: tls_crt.resources[]
+    var: tls_crt.resources[data]
 - name: debug
   debug:
-    var: tls_crt.resources[].data.'tls.crt'
+    var: tls_crt.resources[data.'tls.crt']
