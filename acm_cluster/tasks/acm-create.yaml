@@ -154,4 +154,8 @@
 
 - name: debug
   debug:
-    var: tls_crt.resources.spec
+    var: tls_crt
+    
+- name: debug
+  debug:
+    var: tls_crt.resources.data
