@@ -50,74 +50,74 @@
       type: CatalogSourcesUnhealthy
       status: False
 
-- name: Create Keycloak instance
-  k8s:
-    state: present
-    name: keycloak_instance
-    namespace: sso
-    definition:
-      kind: Keycloak
-      apiVersion: keycloak.org/v1alpha1
-      metadata:
-        name: "{{ cluster_name }}-keycloak"
-        labels:
-          app: sso
-        namespace: sso
-      spec:
-        instances: 1
-        externalAccess:
-          enabled: true
+# - name: Create Keycloak instance
+#   k8s:
+#     state: present
+#     name: keycloak_instance
+#     namespace: sso
+#     definition:
+#       kind: Keycloak
+#       apiVersion: keycloak.org/v1alpha1
+#       metadata:
+#         name: "{{ cluster_name }}-keycloak"
+#         labels:
+#           app: sso
+#         namespace: sso
+#       spec:
+#         instances: 1
+#         externalAccess:
+#           enabled: true
 
-- name: Wait until Keycloak is ready 
-  k8s_info:
-    kind: Pod
-    api_version: v1
-    wait: yes
-    name: keycloak-0
-    namespace: sso
-    wait_condition:
-      type: Ready
-      status: 'True'
+# - name: Wait until Keycloak is ready 
+#   k8s_info:
+#     kind: Pod
+#     api_version: v1
+#     wait: yes
+#     name: keycloak-0
+#     namespace: sso
+#     wait_condition:
+#       type: Ready
+#       status: 'True'
 
-- name: Create Keycloak Realm
-  k8s:
-    state: present
-    name: openshift-realm
-    namespace: sso
-    definition:
-      kind: KeycloakRealm
-      apiVersion: keycloak.org/v1alpha1
-      spec:
-        instanceSelector:
-          matchLabels:
-            app: sso
-        realm:
-          clients:
-            - enabled: true
-              clientAuthenticatorType: client-secret
-              redirectUris:
-                - >-
-                  https://oauth-openshift.apps.{{ cluster_name }}.dragonslair.dev/oauth2callback/myapp
-              clientId: openshift
-              implicitFlowEnabled: false
-              secret: "{{ keycloak_client_secret }}"
-              publicClient: false
-              standardFlowEnabled: true
-              directAccessGrantsEnabled: false
-          displayName: openshift
-          enabled: true
-          id: openshift
-          identityProviders:
-            - alias: github
-              config:
-                clientId: "{{ oauth_client_id }}"
-                clientSecret: "{{ oauth_client_secret }}"
-                syncMode: IMPORT
-                useJwksUrl: 'true'
-              enabled: true
-              firstBrokerLoginFlowAlias: first broker login
-              providerId: github
-          realm: openshift
+# - name: Create Keycloak Realm
+#   k8s:
+#     state: present
+#     name: openshift-realm
+#     namespace: sso
+#     definition:
+#       kind: KeycloakRealm
+#       apiVersion: keycloak.org/v1alpha1
+#       spec:
+#         instanceSelector:
+#           matchLabels:
+#             app: sso
+#         realm:
+#           clients:
+#             - enabled: true
+#               clientAuthenticatorType: client-secret
+#               redirectUris:
+#                 - >-
+#                   https://oauth-openshift.apps.{{ cluster_name }}.dragonslair.dev/oauth2callback/myapp
+#               clientId: openshift
+#               implicitFlowEnabled: false
+#               secret: "{{ keycloak_client_secret }}"
+#               publicClient: false
+#               standardFlowEnabled: true
+#               directAccessGrantsEnabled: false
+#           displayName: openshift
+#           enabled: true
+#           id: openshift
+#           identityProviders:
+#             - alias: github
+#               config:
+#                 clientId: "{{ oauth_client_id }}"
+#                 clientSecret: "{{ oauth_client_secret }}"
+#                 syncMode: IMPORT
+#                 useJwksUrl: 'true'
+#               enabled: true
+#               firstBrokerLoginFlowAlias: first broker login
+#               providerId: github
+#           realm: openshift
 
 - name: Create secret from Keycloak Client
   k8s:
@@ -149,4 +149,4 @@
       metaace: openshift-config
       data:
         ca.crt: |
-          "{{ tls_crt.resources.data.tls.crt }}"
+          tls_crt.resources.data.tls.crt
