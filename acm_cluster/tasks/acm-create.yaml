@@ -157,12 +157,12 @@
 
 - name: Get the original cred secrets
   set_fact:
-    data: "{{ item.data | to_json }}"
+    data: "{{ item.data }}"
   with_items: "{{ router_ca_secret.resources }}"
 
 - name: Get the dockerconfigjson info
   set_fact:
-    secret_string: '{{ data["tls.crt"] | from_json }}'
+    secret_string: '{{ data[.\"tls.crt\"] }}'
 
 - name: debug
   debug:
