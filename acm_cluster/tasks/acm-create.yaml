@@ -140,6 +140,13 @@
     namespace: openshift-ingress-operator
   register: tls_crt
 
-- name: debug
-  debug:
-    var: tls_crt
+- name: Create ConfigMap from tls.crt
+  k8s:
+    state: present
+    kind: ConfigMap
+    definition:
+      apiVersion: v1
+      metaace: openshift-config
+      data:
+        ca.crt: |
+          "{{ tls_crt.resources.data.tls.crt }}"
