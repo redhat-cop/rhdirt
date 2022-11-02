@@ -161,12 +161,12 @@
         ca.crt: |
           {{ tls_crt | b64decode }}
 
-- name: Create ConfigMap from tls.crt
+- name: Create OAuth resource
   k8s:
     state: present
+    kind: OAuth
     definiton:
       apiVersion: config.openshift.io/v1
-      kind: OAuth
       metadata:
         name: cluster
       spec:
