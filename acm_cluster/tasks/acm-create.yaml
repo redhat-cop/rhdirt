@@ -119,18 +119,18 @@
 #               providerId: github
 #           realm: openshift
 
-- name: Create secret from Keycloak Client
-  k8s:
-    state: present
-    definition:
-      apiVersion: v1
-      data:
-        clientSecret: "{{ keycloak_client_secret | b64encode }}"
-      kind: Secret
-      metadata:
-        name: openid-client-secret
-        namespace: openshift-config
-      type: Opaque
+# - name: Create secret from Keycloak Client
+#   k8s:
+#     state: present
+#     definition:
+#       apiVersion: v1
+#       data:
+#         clientSecret: "{{ keycloak_client_secret | b64encode }}"
+#       kind: Secret
+#       metadata:
+#         name: openid-client-secret
+#         namespace: openshift-config
+#       type: Opaque
 
 - name: Get tls.crt from router-ca
   k8s_info:
@@ -140,13 +140,18 @@
     namespace: openshift-ingress-operator
   register: tls_crt
 
-- name: Create ConfigMap from tls.crt
-  k8s:
-    state: present
-    kind: ConfigMap
-    definition:
-      apiVersion: v1
-      metaace: openshift-config
-      data:
-        ca.crt: |
-          tls_crt.resources.data.tls.crt
+# - name: Create ConfigMap from tls.crt
+#   k8s:
+#     state: present
+#     kind: ConfigMap
+#     namespace: openshift-config
+#     definition:
+#       apiVersion: v1
+#       metaace: openshift-config
+#       data:
+#         ca.crt: |
+#           tls_crt.resources.data.tls.crt
+
+- name: debug
+  debug:
+    var: tls_crt.resources
