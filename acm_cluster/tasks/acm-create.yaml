@@ -132,7 +132,7 @@
 #         namespace: openshift-config
 #       type: Opaque
 
-- name: Get tls.crt from router-ca
+- name: Get router-ca secret info
   k8s_info:
     api_version: v1
     kind: Secret
@@ -140,30 +140,25 @@
     namespace: openshift-ingress-operator
   register: router_ca_secret
 
-# - name: Create ConfigMap from tls.crt
-#   k8s:
-#     state: present
-#     kind: ConfigMap
-#     namespace: openshift-config
-#     definition:
-#       apiVersion: v1
-#       metaace: openshift-config
-#       data:
-#         ca.crt: |
-#           tls_crt.resources.data.tls.crt
-
-
-
-
-- name: Get the original cred secrets
+- name: Parse through the router-ca secret info
   set_fact:
     data: "{{ item.data }}"
   with_items: "{{ router_ca_secret.resources }}"
 
-- name: Get the dockerconfigjson info
+- name: Get the tls.crt
   set_fact:
-    secret_string: '{{ data["tls.crt"] }}'
+    tls_crt: '{{ data["tls.crt"] }}'
 
-- name: debug
-  debug:
-    var: secret_string
+- name: Create ConfigMap from tls.crt
+  k8s:
+    state: present
+    name: test-ca
+    kind: ConfigMap
+    namespace: openshift-config
+    definition:
+      apiVersion: v1
+      data:
+        ca.crt: |
+          "{{ tls_crt }}""
+
+
