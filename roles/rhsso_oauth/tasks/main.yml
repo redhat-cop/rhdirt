@@ -2,7 +2,7 @@
 
 - name: path check
   shell:
-    command: pwd
+    cmd: pwd
   register: dir
 
 - name: where
