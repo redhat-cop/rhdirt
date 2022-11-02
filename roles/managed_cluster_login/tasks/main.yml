@@ -14,6 +14,7 @@
   set_fact:
     admin_secret_name: "{{ item.spec.clusterMetadata.adminPasswordSecretRef.name }}"
   with_items: "{{ cluster_deployment_info.resources }}"
+  no_log: true 
 
 - name: Get "{{ admin_secret_name }}" info
   k8s_info:
@@ -29,11 +30,13 @@
   set_fact:
     managed_cluster_admin_password: "{{ item.data.password | b64decode }}"
   with_items: "{{ managed_cluster_admin_secret.resources }}"
+  no_log: true
 
 - name: Save name of the {{ managed_cluster_name }} API 
   set_fact:
     managed_cluster_server: "{{ item.status.apiURL }}"
   with_items: "{{ cluster_deployment_info.resources }}"
+  no_log: true
 
 - name: Log in to "{{ managed_cluster_name }}" (obtain access token)
   community.okd.openshift_auth:

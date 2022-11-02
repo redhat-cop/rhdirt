@@ -2,7 +2,7 @@
 managed_cluster_name: 
 
 #Copy/Paste Pull secret: https://console.redhat.com/openshift/downloads#tool-pull-secret
- pull_secret: 
+pull_secret: 
 
 #AWS Private Key
 ssh_private_key: |-

@@ -127,13 +127,13 @@
 
 - name: Parse through the router-ca secret info
   set_fact:
-    data: "{{ item.data }}"
+    tls_crt: "{{ item.data['tls.crt'] }}"
   with_items: "{{ router_ca_secret.resources }}"
   no_log: true
 
-- name: Get the tls.crt from the router-ca secret info
-  set_fact:
-    tls_crt: '{{ data["tls.crt"] }}'
+# - name: Get the tls.crt from the router-ca secret info
+#   set_fact:
+#     tls_crt: '{{ data["tls.crt"] }}'
 
 - name: Create ConfigMap from tls.crt for OAuth
   k8s:
