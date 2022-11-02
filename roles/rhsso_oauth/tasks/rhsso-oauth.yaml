@@ -74,7 +74,7 @@
               clientAuthenticatorType: client-secret
               redirectUris:
                 - >-
-                  https://oauth-openshift.apps.{{ managed_cluster_name }}.{{ domain_name }}/oauth2callback/rh-sso
+                  https://oauth-openshift.apps.{{ managed_cluster_name }}."{{ domain_name }}"/oauth2callback/rh-sso
               clientId: openshift
               implicitFlowEnabled: false
               secret: "{{ keycloak_client_secret }}"
