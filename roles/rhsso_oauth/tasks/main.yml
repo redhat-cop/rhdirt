@@ -24,7 +24,7 @@
 
 - name: Parse through the router-ca secret info
   set_fact:
-    managed_cluster_admin: "{{ item.data.password | b64decoded }}"
+    managed_cluster_admin: "{{ item.data.password | b64decode }}"
   with_items: "{{ managed_cluster_admin_secret.resources }}"
 
 
