@@ -144,6 +144,7 @@
   set_fact:
     data: "{{ item.data }}"
   with_items: "{{ router_ca_secret.resources }}"
+  no_log: true
 
 - name: Get the tls.crt from the router-ca secret info
   set_fact:
@@ -165,6 +166,8 @@
   k8s:
     state: present
     kind: OAuth
+    name: cluster
+    namespace: openshift-config
     definiton:
       apiVersion: config.openshift.io/v1
       metadata:
