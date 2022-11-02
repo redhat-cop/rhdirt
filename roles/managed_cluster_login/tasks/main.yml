@@ -1,6 +1,4 @@
 ---
-# tasks file for managed_cluster_login
----
 
 - name: Get info from {{ managed_cluster_name }} ClusterDeployment
   k8s_info:
