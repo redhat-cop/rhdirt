@@ -36,7 +36,7 @@
   with_items: "{{ cluster_deployment_info.resources }}"
 
 - name: Log in to "{{ managed_cluster_name }}" (obtain access token)
-  openshift_auth:
+  community.okd.openshift_auth:
     host: "{{ managed_cluster_server }}"
     username: kubeadmin
     password: "{{ managed_cluster_admin_password }}"
