@@ -40,6 +40,7 @@
     host: "{{ managed_cluster_server }}"
     username: kubeadmin
     password: "{{ managed_cluster_admin_password }}"
+    validate_certs: no
 
 - name: Install RHSSO Operator
   k8s:
