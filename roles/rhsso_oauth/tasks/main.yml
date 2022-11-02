@@ -1,7 +1,7 @@
 ---
 - name: Install RHSSO Operator
   k8s:
-    definition: "{{ lookup('kubernetes.core.kustomize', dir='rhsso_oauth/files/rhsso-operator/base') }}"  
+    definition: "{{ lookup('kubernetes.core.kustomize', dir='../roles/rhsso_oauth/files/rhsso-operator/base') }}"  
 
 - name: Wait until the Operator is ready
   k8s_info:
