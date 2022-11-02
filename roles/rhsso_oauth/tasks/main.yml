@@ -1,9 +1,15 @@
 ---
 
+- name: Get router-ca secret info
+  k8s_info:
+    api_version: v1
+    kind: Secret
+    name: router-ca
+    namespace: openshift-ingress-operator
+  register: router_ca_secret
+
 - name: Get the info for the {{ managed_cluster_name }} ClusterDeployment
   k8s_info:
-    api_key: "{{ acm_hub_service_account }}"
-    host: "{{ acm_hub_server }}"
     validate_certs: no
     api_version: hive.openshift.io/v1
     kind: ClusterDeployment
