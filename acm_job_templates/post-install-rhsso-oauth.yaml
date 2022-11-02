@@ -8,4 +8,3 @@
       validate_certs: no
   roles:
   - ../roles/rhsso_oauth
-  
