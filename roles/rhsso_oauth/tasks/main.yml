@@ -11,7 +11,7 @@
 
 - name: Get name of the {{ managed_cluster_name }} admin secret 
   set_fact:
-    admin_secret_name: "{{ item.spec.clusterMetadata.adminPasswordSecretRef }}"
+    admin_secret_name: "{{ item.spec.clusterMetadata.adminPasswordSecretRef.name }}"
   with_items: "{{ cluster_deployment_info.resources }}"
 
 - name: Get "{{ admin_secret_name }}" info
