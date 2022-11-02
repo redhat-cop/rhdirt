@@ -37,7 +37,7 @@
 
 - name: Install RHSSO Operator
   k8s:
-    definition: "{{ lookup('kubernetes.core.kustomize', dir='acm_managed_cluster/files/rhsso-operator/base') }}"  
+    definition: "{{ lookup('kubernetes.core.kustomize', dir='acm_managed_cluster/files/rhsso-operator-test/base') }}"  
 
 - name: Wait until the Operator is ready
   k8s_info:
