@@ -40,7 +40,6 @@
     host: "{{ managed_cluster_server }}"
     username: kubeadmin
     password: "{{ managed_cluster_admin_password }}"
-  register: openshift_auth_results.k8s_auth.api_key
 
 - name: Install RHSSO Operator
   k8s:
