@@ -3,8 +3,6 @@
 - hosts: localhost
   module_defaults:
     group/k8s:
-      api_key: "{{ acm_hub_service_account }}"
-      host: "{{ acm_hub_server }}"
       validate_certs: no
   roles:
   - roles/acm_managed_cluster
