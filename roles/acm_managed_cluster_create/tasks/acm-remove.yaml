@@ -8,12 +8,12 @@
 
 - name: Remove cluster from ACM
   shell:
-    cmd: oc delete clusterdeployment.hive.openshift.io/"{{ cluster_name }}" -n {{ cluster_name }}
+    cmd: oc delete clusterdeployment.hive.openshift.io/"{{ managed_cluster_name }}" -n {{ managed_cluster_name }}
 
 - name: Remove management from ACM
   shell:
-    cmd: oc delete managedclusters.cluster.open-cluster-management.io/"{{ cluster_name }}" 
+    cmd: oc delete managedclusters.cluster.open-cluster-management.io/"{{ managed_cluster_name }}" 
 
-- name: Delete project "{{ cluster_name }}""
+- name: Delete project "{{ managed_cluster_name }}""
   shell:
-    cmd: oc delete project "{{ cluster_name }}"
+    cmd: oc delete project "{{ managed_cluster_name }}"
