@@ -20,9 +20,9 @@
       type: CatalogSourcesUnhealthy
       status: False
 
-- name: Sleep for 5 seconds
+- name: Sleep for 15 seconds
   shell:
-    cmd: sleep 5
+    cmd: sleep 15
 
 - name: Create Keycloak instance
   k8s:
@@ -34,7 +34,7 @@
     namespace: sso
     definition:
       kind: Keycloak
-      apiVersion: keycloak.org
+      apiVersion: keycloak.org/v1alpha1
       metadata:
         name: "{{ managed_cluster_name }}-keycloak"
         labels:
