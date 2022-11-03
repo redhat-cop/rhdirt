@@ -3,7 +3,7 @@
     api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
     host: "{{ managed_cluster_server }}"
     state: present
-    src: hackathon-participants.yaml
+    src: ../hackathon-participants.yaml
 
 - name: Create cluster-admin RoleBinding for the group
   k8s:    
