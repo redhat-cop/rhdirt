@@ -20,10 +20,6 @@
   shell:
     cmd: oc login --token="{{ acm_hub_service_account }}" --server="{{ acm_hub_server }}"
 
-# - name: Navigate to ansible-automation-platform namespace
-#   shell:
-#     cmd: oc project ansible-automation-platform
-
 - name: Create secret from the install-config template
   shell:
     cmd: oc create secret generic {{ managed_cluster_name }}-install-config --from-file=install-config.yaml=install-config.yaml -n "{{ managed_cluster_name }}"
