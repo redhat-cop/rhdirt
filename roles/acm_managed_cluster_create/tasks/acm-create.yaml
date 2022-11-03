@@ -9,7 +9,7 @@
     src: "install-config.yaml.j2"
     dest: "install-config.yaml"
 
-- name: Create {{ project_name }} namespace
+- name: Create {{ managed_cluster_name }} namespace
   k8s:
     api_version: project.openshift.io/v1
     kind: Project
@@ -18,11 +18,11 @@
 
 - name: Login with openshift
   shell:
-    cmd: oc login --token="{{ acm_hub_service_account }}" --server="{{ openshift_server }}"
+    cmd: oc login --token="{{ acm_hub_service_account }}" --server="{{ acm_hub_server }}"
 
-- name: Navigate to ansible-automation-platform namespace
-  shell:
-    cmd: oc project ansible-automation-platform
+# - name: Navigate to ansible-automation-platform namespace
+#   shell:
+#     cmd: oc project ansible-automation-platform
 
 - name: Create secret from the install-config template
   shell:
