@@ -170,17 +170,17 @@
 #         labels:
 #           app: sso
 #       spec:
-#         realmSelector:
-#           matchLabels:
-#             app: sso
-#         user:
-#           credentials:
-#             - type: password
-#               value: redhat
-#           email: user@example.com
-#           enabled: true
-#           firstName: shadowman
-#           username: shadowman
+        # realmSelector:
+        #   matchLabels:
+        #     app: sso
+        # user:
+        #   credentials:
+        #     - type: password
+        #       value: redhat
+        #   email: user@example.com
+        #   enabled: true
+        #   firstName: shadowman
+        #   username: shadowman
 
 - name: Create OAuth resource
   k8s:

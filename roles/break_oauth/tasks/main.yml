@@ -1,0 +1,38 @@
+---
+- name: Create Broken OAuth resource
+  k8s:
+    api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
+    host: "{{ managed_cluster_server }}"
+    validate_certs: no
+    state: present
+    kind: OAuth
+    name: cluster
+    namespace: openshift-config
+    definition:
+      apiVersion: config.openshift.io/v1
+      metadata:
+        name: cluster
+      spec:
+        identityProviders:
+          - mappingMethod: claim
+            name: rh-sso
+            openID:
+              ca:
+                name: "{{ managed_cluster_name }}-openid"
+              claims:
+                email:
+                  - email
+                name:
+                  - name
+                preferredUsername:
+                  - preferred_username
+              clientID: openshift
+              clientSecret:
+                name: >-
+                  "{{ managed_cluster_name }}-openid-client-secret-
+                  █▀█ █▀▀ █▀▄   █░█ ▄▀█ ▀█▀
+                  █▀▄ ██▄ █▄▀   █▀█ █▀█ ░█░"
+              extraScopes: []
+              issuer: >-
+                https://keycloak-sso.apps.{{ managed_cluster_name }}.{{ domain_name }}/auth/realms/openshift
+            type: OpenID
