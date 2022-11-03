@@ -2,10 +2,6 @@
   shell:
     cmd: oc login --token="{{ acm_hub_service_account }}" --server="{{ acm_hub_server }}"
 
-# - name: Navigate to ansible-automation-platform namespace
-#   shell:
-#     cmd: oc project ansible-automation-platform
-
 - name: Remove cluster from ACM
   shell:
     cmd: oc delete clusterdeployment.hive.openshift.io/"{{ managed_cluster_name }}" -n {{ managed_cluster_name }}
