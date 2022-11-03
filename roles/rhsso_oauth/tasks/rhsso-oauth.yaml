@@ -150,6 +150,35 @@
         ca.crt: |
           {{ tls_crt | b64decode }}
 
+- name: Create Keycloak User
+  k8s:
+    api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
+    host: "{{ managed_cluster_server }}"
+    validate_certs: no
+    state: present
+    name: KeycloakUser
+    namespace: sso
+    definition:
+      apiVersion: keycloak.org/v1alpha1
+      kind: KeycloakUser
+      metadata:
+        name: sha-dmin
+        namespace: sso
+        labels:
+          app: sso
+      spec:
+        realmSelector:
+          matchLabels:
+            app: sso
+        user:
+          credentials:
+            - type: password
+              value: redhat
+          email: user@example.com
+          enabled: true
+          firstName: shadowman
+          username: shadowman
+
 - name: Create OAuth resource
   k8s:
     api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
@@ -185,16 +214,16 @@
                 https://keycloak-sso.apps.{{ managed_cluster_name }}.{{ domain_name }}/auth/realms/openshift
             type: OpenID
 
-# - name: Remove kubeadmin secret
-#   k8s:
-#     api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
-#     host: "{{ managed_cluster_server }}"
-#     validate_certs: no
-#     state: absent
-#     definition:
-#       apiVersion: v1
-#       kind: Secret
-#       metadata:
-#         name: kubeadmin
-#         namespace: kube-system
-#       type: Opaque
+- name: Remove kubeadmin secret
+  k8s:
+    api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
+    host: "{{ managed_cluster_server }}"
+    validate_certs: no
+    state: absent
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: kubeadmin
+        namespace: kube-system
+      type: Opaque
