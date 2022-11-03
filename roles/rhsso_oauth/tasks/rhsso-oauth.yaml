@@ -214,16 +214,16 @@
                 https://keycloak-sso.apps.{{ managed_cluster_name }}.{{ domain_name }}/auth/realms/openshift
             type: OpenID
 
-- name: Remove kubeadmin secret
-  k8s:
-    api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
-    host: "{{ managed_cluster_server }}"
-    validate_certs: no
-    state: absent
-    definition:
-      apiVersion: v1
-      kind: Secret
-      metadata:
-        name: kubeadmin
-        namespace: kube-system
-      type: Opaque
+# - name: Remove kubeadmin secret
+#   k8s:
+#     api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
+#     host: "{{ managed_cluster_server }}"
+#     validate_certs: no
+#     state: absent
+#     definition:
+#       apiVersion: v1
+#       kind: Secret
+#       metadata:
+#         name: kubeadmin
+#         namespace: kube-system
+#       type: Opaque
