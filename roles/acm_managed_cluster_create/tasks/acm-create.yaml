@@ -32,13 +32,13 @@
   shell:
     cmd: oc apply -f acm-cluster-create.yaml
 
-# - name: Wait until the Operator is ready
-#   k8s_info:
-#     kind: ClusterDeployment
-#     api_version: hive.openshift.io/v1
-#     name: rhsso-operator
-#     namespace: "{{ managed_cluster_name }}"
-#     wait: yes
-#     wait_condition:
-#       type: CatalogSourcesUnhealthy
-#       status: False
+- name: Wait until the Cluster is ready
+  k8s_info:
+    kind: ClusterDeployment
+    api_version: hive.openshift.io/v1
+    name: "{{ managed_cluster_name }}"
+    namespace: "{{ managed_cluster_name }}"
+    wait: yes
+    wait_condition:
+      type: Ready
+      status: 'True'
