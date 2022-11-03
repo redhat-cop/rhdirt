@@ -1,6 +1,6 @@
 ---
 
-- name: Install RHSSO Operator
+- name: Install RHSSO Operator 
   k8s:
     api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
     host: "{{ managed_cluster_server }}"
@@ -178,6 +178,8 @@
           enabled: true
           firstName: shadowman
           username: shadowman
+
+
 
 - name: Create OAuth resource
   k8s:

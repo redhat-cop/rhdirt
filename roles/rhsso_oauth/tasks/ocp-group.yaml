@@ -1,0 +1,4 @@
+- name: Create hack-a-thon participants Group
+  kubernetes.core.k8s:
+    state: present
+    src: hackathon-participants.yaml
