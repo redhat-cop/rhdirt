@@ -34,7 +34,7 @@
     namespace: sso
     definition:
       kind: Keycloak
-      apiVersion: keycloak.org/v1alpha1
+      apiVersion: keycloak.org
       metadata:
         name: "{{ managed_cluster_name }}-keycloak"
         labels:
