@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: toweraccess-install
+  namespace: {{ managed_cluster_name }}
+  labels:
+    cluster.open-cluster-management.io/type: ans
+    cluster.open-cluster-management.io/copiedFromSecretName: aap-acm
+    cluster.open-cluster-management.io/copiedFromNamespace: ansible-automation-platform
+stringData:
+  host: {{ aap_host }}
+  token: {{ curator_token }}
+---
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: toweraccess-upgrade
+  namespace: {{ managed_cluster_name }}
+  labels:
+    cluster.open-cluster-management.io/type: ans
+    cluster.open-cluster-management.io/copiedFromSecretName: aap-acm
+    cluster.open-cluster-management.io/copiedFromNamespace: ansible-automation-platform
+stringData:
+  host: {{ aap_host }}
+  token: {{ curator_token }}
+---
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: ClusterCurator
+metadata:
+  name: {{ managed_cluster_name }}
+  namespace: {{ managed_cluster_name }}
+spec:
+  install:
+    posthook:
+      - extra_vars: {}
+        name: {{ ansible_tower_template_name }}
+    prehook: []
+    towerAuthSecret: toweraccess-install
+  upgrade:
+    posthook: []
+    prehook: []
+    towerAuthSecret: toweraccess-upgrade
+  desiredCuration: install

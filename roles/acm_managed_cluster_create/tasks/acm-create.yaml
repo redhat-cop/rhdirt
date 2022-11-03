@@ -28,9 +28,14 @@
   shell:
     cmd: oc create secret generic {{ managed_cluster_name }}-install-config --from-file=install-config.yaml=install-config.yaml -n "{{ managed_cluster_name }}"
 
+- name: Create rhsso-github-setup ClusterCurator resources to trigger Ansible template after cluster is created - if boolean is set to true
+  import_tasks: cluster-curator.yaml
+  when: rhsso_curator
+  
 - name: Create cluster resources for ACM
   shell:
     cmd: oc apply -f acm-cluster-create.yaml
+
 
 - name: Wait until the Cluster is ready
   k8s_info:

@@ -1,4 +1,27 @@
 - name: Create hack-a-thon participants Group
-  kubernetes.core.k8s:
+  k8s:
+    api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
+    host: "{{ managed_cluster_server }}"
     state: present
     src: hackathon-participants.yaml
+
+- name: Create cluster-admin RoleBinding for the group
+  k8s:    
+    api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
+    host: "{{ managed_cluster_server }}"
+    validate_certs: no
+    state: present
+    definition:
+      kind: ClusterRoleBinding
+      apiVersion: rbac.authorization.k8s.io/v1
+      metadata:
+        name: admins
+      subjects:
+        - kind: Group
+          apiGroup: rbac.authorization.k8s.io
+          name: admins
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: cluster-admin
+

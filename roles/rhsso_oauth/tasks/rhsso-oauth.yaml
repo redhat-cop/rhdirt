@@ -20,9 +20,9 @@
       type: CatalogSourcesUnhealthy
       status: False
 
-- name: Sleep for 2 seconds
+- name: Sleep for 5 seconds
   shell:
-    cmd: sleep 2
+    cmd: sleep 5
 
 - name: Create Keycloak instance
   k8s:
@@ -178,8 +178,6 @@
           enabled: true
           firstName: shadowman
           username: shadowman
-
-
 
 - name: Create OAuth resource
   k8s:

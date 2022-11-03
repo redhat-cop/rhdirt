@@ -1,0 +1,8 @@
+- name: Template Cluster Curator resources 
+  template:
+    src: "cluster-curator.yaml.j2"
+    dest: "cluster-curator.yaml"
+
+- name: Create cluster curator resources for ACM
+  shell:
+    cmd: oc apply -f cluster-curator.yaml

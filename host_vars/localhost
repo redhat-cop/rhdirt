@@ -6,11 +6,11 @@ pull_secret:
 
 #AWS Private Key
 ssh_private_key: |-
-  <paste and indent>
+  <paste and indent - multi line>
 
 #AWS Public Key
 ssh_public_key: |-
-  <paste and indent>
+  <paste and indent - one line>
 
 #AWS Credentials
 aws_access_key_id: 
@@ -29,3 +29,10 @@ keycloak_client_secret: 84f837f9-8567-4ade-9c18-ad90ce856757
 #Oauth information required for Github
 oauth_client_id: 
 oauth_client_secret: 
+
+#Ansible post-install hook information; set to true to trigger template
+rhsso_curator: true
+#get token value from aap-acm secret in ansible-automation-platform namespace of hub cluster
+curator_token: cW0GGGUGYbbhho9mICUJM
+aap_host: https://example-ansible-automation-platform.apps.example.example.dev
+ansible_tower_template_name: rhsso-github-setup
