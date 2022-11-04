@@ -20,9 +20,9 @@
       type: CatalogSourcesUnhealthy
       status: False
 
-- name: Sleep for 15 seconds
+- name: Sleep for 30 seconds
   shell:
-    cmd: sleep 15
+    cmd: sleep 30
 
 - name: Create Keycloak instance
   k8s:
@@ -219,7 +219,7 @@
 
 - name: Wait for Oauth pods to re instantiate
   shell:
-    cmd: sleep 10800
+    cmd: sleep 240
 
 # - name: Remove kubeadmin secret
 #   k8s:
