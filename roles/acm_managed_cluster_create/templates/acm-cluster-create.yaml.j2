@@ -67,7 +67,7 @@ kind: Secret
 metadata:
   name: {{ managed_cluster_name }}-pull-secret
   namespace: '{{ managed_cluster_name }}'
-stringData:
+data:
   .dockerconfigjson: >-
     {{ pull_secret }}
 type: kubernetes.io/dockerconfigjson
