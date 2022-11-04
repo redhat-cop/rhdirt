@@ -51,6 +51,3 @@
       type: Ready
       status: 'True'
 
-# - name: test
-#   shell:
-#     cmd: sleep 3000 
