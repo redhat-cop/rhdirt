@@ -26,7 +26,7 @@
                   - name
                 preferredUsername:
                   - preferred_username
-              clientID: openshift
+              clientID: openshifttt
               clientSecret:
                 name: "{{ managed_cluster_name }}-openid-client-secrettypo"
               extraScopes: []
