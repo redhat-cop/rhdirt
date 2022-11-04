@@ -13,7 +13,7 @@ spec:
   clusterName: '{{ managed_cluster_name }}'
   controlPlaneConfig:
     servingCertificates: {}
-  installAttemptsLimit: 0
+  installAttemptsLimit: 1
   installed: false
   platform:
     aws:
@@ -67,8 +67,8 @@ kind: Secret
 metadata:
   name: {{ managed_cluster_name }}-pull-secret
   namespace: '{{ managed_cluster_name }}'
-data:
-  .dockerconfigjson: >-
+stringData:
+  .dockerconfigjson: |-
     {{ pull_secret }}
 type: kubernetes.io/dockerconfigjson
 ---
