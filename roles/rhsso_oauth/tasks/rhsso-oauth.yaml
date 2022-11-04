@@ -1,8 +1,8 @@
 ---
 
-# - name: Cluster is Ready... will install RHSSO in 60 seconds
-#   shell:
-#     cmd: sleep 60 
+- name: Cluster is Ready... will install RHSSO in 60 seconds
+  shell:
+    cmd: sleep 60 
 
 - name: Install RHSSO Operator 
   k8s:
@@ -59,9 +59,11 @@
     name: keycloak-0
     namespace: sso
     wait: yes
+    wait_timeout: 240
     wait_condition:
       type: Ready
       status: 'True'
+    
 
 - name: Create Keycloak Realm
   k8s:
