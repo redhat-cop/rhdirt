@@ -64,7 +64,6 @@
       type: Ready
       status: 'True'
     
-
 - name: Create Keycloak Realm
   k8s:
     api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
@@ -227,7 +226,7 @@
   shell:
     cmd: sleep 240
 
-- name: Get the {{ managed_cluster_name }} console URL
+- name: Get console config map info
   k8s_info:
     api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
     host: "{{ managed_cluster_server }}"
@@ -237,7 +236,7 @@
     namespace: openshift-config-managed
   register: cluster_console_info
 
-- name: Get name of the {{ managed_cluster_name }} admin secret 
+- name: Get name of the {{ managed_cluster_name }} console URL
   set_fact:
     console_url: "{{ item.data.consoleURL }}"
   with_items: "{{ cluster_console_info.resources }}"
