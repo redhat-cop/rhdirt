@@ -28,16 +28,9 @@
 #   import_tasks: cluster-curator.yaml
 #   when: rhsso_curator
 
-- name: Create hack-a-thon participants Group
-  k8s:
-    api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
-    host: "{{ managed_cluster_server }}"
-    state: present
-    src: acm-cluster-create.yaml
-
-# - name: Create cluster resources for ACM
-#   shell:
-#     cmd: oc apply -f acm-cluster-create.yaml
+- name: Create cluster resources for ACM
+  shell:
+    cmd: oc apply -f acm-cluster-create.yaml
 
 - name: Wait until the Cluster is ready
   k8s_info:
