@@ -7,6 +7,6 @@
       host: "{{ acm_hub_server }}"
       validate_certs: no
   roles:
-  - roles/acm_managed_cluster_create
   - roles/managed_cluster_login
+  - roles/acm_managed_cluster_create
   - roles/rhsso_oauth
