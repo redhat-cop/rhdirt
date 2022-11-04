@@ -94,7 +94,7 @@
               secret: "{{ keycloak_client_secret }}"
               publicClient: false
               standardFlowEnabled: true
-              directAccessGrantsEnabled: true
+              directAccessGrantsEnabled: false
           displayName: openshift
           enabled: true
           id: openshift
