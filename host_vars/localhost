@@ -35,5 +35,5 @@ rhsso_curator: true
 #get token value from aap-acm secret in ansible-automation-platform namespace of hub cluster
 curator_token: cW0GGGUGYbbhho9mICUJM
 aap_host: https://example-ansible-automation-platform.apps.example.example.dev
-ansible_tower_template_name: rhsso-github-
+ansible_tower_template_name: rhsso-github-setup
 
