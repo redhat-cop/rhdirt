@@ -217,7 +217,7 @@
                 https://keycloak-sso.apps.{{ managed_cluster_name }}.{{ domain_name }}/auth/realms/openshift
             type: OpenID
 
-- name: Wait for Oauth pods to re instantiate
+- name: Wait for Oauth pods to re-deploy
   shell:
     cmd: sleep 240
 

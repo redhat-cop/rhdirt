@@ -29,9 +29,7 @@
               clientID: openshift
               clientSecret:
                 name: >-
-                  "{{ managed_cluster_name }}-openid-client-secret-
-                  █▀█ █▀▀ █▀▄   █░█ ▄▀█ ▀█▀
-                  █▀▄ ██▄ █▄▀   █▀█ █▀█ ░█░"
+                  "{{ managed_cluster_name }}-openid-client-secret-TYP0"
               extraScopes: []
               issuer: >-
                 https://keycloak-sso.apps.{{ managed_cluster_name }}.{{ domain_name }}/auth/realms/openshift
