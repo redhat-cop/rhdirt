@@ -1,4 +1,5 @@
 ---
+
 - name: Get the {{ managed_cluster_name }} console URL
   k8s_info:
     api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
@@ -13,7 +14,7 @@
   set_fact:
     console_url: "{{ item.data.consoleURL[1:-1] }}"
   with_items: "{{ cluster_console_info.resources }}"
-  no_log: true 
+  # no_log: true 
 
 - name: Display console URL
   debug:
