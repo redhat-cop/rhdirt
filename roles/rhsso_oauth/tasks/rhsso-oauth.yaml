@@ -24,9 +24,9 @@
       type: CatalogSourcesUnhealthy
       status: False
 
-- name: Sleep for 30 seconds
+- name: Sleep for 60 seconds
   shell:
-    cmd: sleep 30
+    cmd: sleep 60
 
 - name: Create Keycloak instance
   k8s:
@@ -62,7 +62,6 @@
     wait_condition:
       type: Ready
       status: 'True'
-
 
 - name: Create Keycloak Realm
   k8s:
