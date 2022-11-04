@@ -18,7 +18,7 @@
             name: rh-sso
             openID:
               ca:
-                name: "{{ managed_cluster_name }}-openid"
+                name: "{{ managed_cluster_name }}-openid-ca"
               claims:
                 email:
                   - email
@@ -28,8 +28,7 @@
                   - preferred_username
               clientID: openshift
               clientSecret:
-                name: >-
-                  "{{ managed_cluster_name }}-openid-client-secret-thisisatypo"
+                name: "{{ managed_cluster_name }}-openid-client-secrettypo"
               extraScopes: []
               issuer: >-
                 https://keycloak-sso.apps.{{ managed_cluster_name }}.{{ domain_name }}/auth/realms/openshift
