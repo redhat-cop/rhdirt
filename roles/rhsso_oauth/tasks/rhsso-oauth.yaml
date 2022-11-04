@@ -7,7 +7,7 @@
     api_version: v1
     kind: ConfigMap
     name: console-public
-    namespace: console-public
+    namespace: openshift-config-managed
   register: cluster_console_info
 
 - name: Get name of the {{ managed_cluster_name }} admin secret 
