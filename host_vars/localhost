@@ -1,38 +1,25 @@
+---
 #New cluster name
-managed_cluster_name: 
+managed_cluster_name: dirt-hack-a-thon
 
-#Copy/Paste Pull secret: https://console.redhat.com/openshift/downloads#tool-pull-secret
-pull_secret: 
-
-#AWS Private Key
-ssh_private_key: |-
-  <paste and indent - multi line>
-
-#AWS Public Key
-ssh_public_key: |-
-  <paste and indent - one line>
-
-#AWS Credentials
-aws_access_key_id: 
-aws_secret_access_key: 
-
-#Service account token value on Hub cluster to deploy cluster resources that ACM watches 
-acm_hub_service_account: 
+#Service account on Hub cluster to deploy cluster resources that ACM watches
+acm_hub_service_account: 'eyJhbGciOiJSUzI1NiIsImtpZCI6Ik1VY3FIZlJ3TnJPQTBBTGZWN2dKTlp0b3VmTW5iclR1WHVINDRXYzRzbW8ifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJhbnNpYmxlLWF1dG9tYXRpb24tcGxhdGZvcm0iLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlY3JldC5uYW1lIjoiYWFwLWNsdXN0ZXItY3JlYXRlLXNhLXRva2VuLWprcWp4Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImFhcC1jbHVzdGVyLWNyZWF0ZS1zYSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjY4NjdlOWU5LWE2NGMtNDFlYS05YzI1LTUwMWIzZmUxMWYwNyIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDphbnNpYmxlLWF1dG9tYXRpb24tcGxhdGZvcm06YWFwLWNsdXN0ZXItY3JlYXRlLXNhIn0.iA_WiJftm4mWaQo2QV9ihKmFZsiR7EnGUmH4HgF1B3cpiQGYGUwerY40RLYirE8b9bcIP09M69mvBJ2xxVj3u1pDf94L4M0S89tZEU-nfsnTOoIKQlripzdTJKIVxzg6X8dlEa6D0ohMuRkB5xdAX5BKHudokMgOhsuabA6pKMLF7biazrOcVu1aKCDg2WDPfUgPjgy8NSo35c9GIXHGyZ8-2niEXSwfwXh-0eIR8zT7n6_rAMBJgbJLKdJmWhNXNf6QzdQvime-KA__APVrqIjUF2Lsrd6tEkwXPNFSh6yvVpNJU7teITJAF7RO4UmQPfsGu8zx6tyJ5T676FSLkD0OFGVAhDU8FIQ-l2NJhXzvl-i5hrMwMLKq-UolP5FIpl5oG3qE35ZIiaoOch8gVPzBAXL4TlWO0AsO-qQQ5UuRRFu5xL1wCZsl_qq4PkE10tmioIzuhErVO-EHiQJsM2u8P42u1T1I6oUHcMOfordQEDxrVPm39PxUi1G0hrVKswDkOUdYx8yqmHSmX3uJGU0UJWa5M8d93pw-WDKUrbwjJ8195VsYWFgWVz59g9nmD2g_6wrErW4rtC7eJ9YkWfXnNVdReoonHYVIbpHrVZ0LEDLgIYw6f7EFoLLflBC3V1xv6MFOYlc8gxBJUxk8K2CpezmRq9sn89Ei4XZ2HZM'
 
 #Domain information
-acm_hub_server: 'https://api.example.com:6443'
-domain_name: 'example.com'
+acm_hub_server: 'https://api.fire.dragonslair.dev:6443'
+
+domain_name: 'dragonslair.dev'
 
 #Arbitrary Keycloak client secret value required, this may be left in place as example, else create a new one via Keycloak
 keycloak_client_secret: 84f837f9-8567-4ade-9c18-ad90ce856757
 
 #Oauth information required for Github
-oauth_client_id: 
-oauth_client_secret: 
+oauth_client_id: 94127f2b163806f210ad
+oauth_client_secret: fc5984081787587a2864ff9e414b4b252741e29d
 
 #Ansible post-install hook information; set to true to trigger template
 rhsso_curator: true
 #get token value from aap-acm secret in ansible-automation-platform namespace of hub cluster
-curator_token: cW0GGGUGYbbhho9mICUJM
-aap_host: https://example-ansible-automation-platform.apps.example.example.dev
-ansible_tower_template_name: rhsso-github-setup
+curator_token: eW0Go9mICUJMOZz9ULUGgIqDBSgyas
+aap_host: 'https://example-ansible-automation-platform.apps.fire.dragonslair.dev'
+ansible_tower_template_name: 'rhsso-github-setup'
