@@ -75,16 +75,6 @@ type: kubernetes.io/dockerconfigjson
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ managed_cluster_name }}-install-config
-  namespace: '{{ managed_cluster_name }}'
-type: Opaque
-data:
-  # Base64 encoding of install-config yaml
-  install-config.yaml: {{ install_config }}
----
-apiVersion: v1
-kind: Secret
-metadata:
   name: {{ managed_cluster_name }}-ssh-private-key
   namespace: '{{ managed_cluster_name }}'
 stringData:

@@ -18,39 +18,34 @@
 
 - name: Login with openshift
   shell:
-    cmd: oc login --token={{ acm_hub_service_account }} --server={{ acm_hub_server }} --insecure-skip-tls-verify=true
+    cmd: oc login --token={{ acm_hub_service_account }} --server={{ acm_hub_server }}
 
 - name: Create secret from the install-config template
   shell:
     cmd: oc create secret generic {{ managed_cluster_name }}-install-config --from-file=install-config.yaml=install-config.yaml -n "{{ managed_cluster_name }}"
 
-
-- name: Debug {{ managed_cluster_name }}
-  shell:
-    cmd: sleep 2000
-
 # - name: Create rhsso-github-setup ClusterCurator resources to trigger Ansible template after cluster is created - if boolean is set to true
 #   import_tasks: cluster-curator.yaml
 #   when: rhsso_curator
 
-# - name: Create ACM resources
-#   k8s:
-#     state: present
-#     src: acm-cluster-create.yaml
+- name: Create ACM resources
+  k8s:
+    state: present
+    src: acm-cluster-create.yaml
 
 # - name: Create cluster resources for ACM
 #   shell:
 #     cmd: oc apply -f acm-cluster-create.yaml
 
-# - name: Wait until the Cluster is ready
-#   k8s_info:
-#     kind: ClusterDeployment
-#     api_version: hive.openshift.io/v1
-#     name: "{{ managed_cluster_name }}"
-#     namespace: "{{ managed_cluster_name }}"
-#     wait: yes
-#     wait_timeout: 3600
-#     wait_condition:
-#       type: Ready
-#       status: 'True'
+- name: Wait until the Cluster is ready
+  k8s_info:
+    kind: ClusterDeployment
+    api_version: hive.openshift.io/v1
+    name: "{{ managed_cluster_name }}"
+    namespace: "{{ managed_cluster_name }}"
+    wait: yes
+    wait_timeout: 3600
+    wait_condition:
+      type: Ready
+      status: 'True'
 
