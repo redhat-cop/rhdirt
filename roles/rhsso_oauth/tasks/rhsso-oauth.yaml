@@ -1,191 +1,191 @@
 ---
 
-- name: Cluster is Ready... will install RHSSO in 60 seconds
-  shell:
-    cmd: sleep 60 
+# - name: Cluster is Ready... will install RHSSO in 60 seconds
+#   shell:
+#     cmd: sleep 60 
 
-- name: Install RHSSO Operator 
-  k8s:
-    api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
-    host: "{{ managed_cluster_server }}"
-    definition: "{{ lookup('kubernetes.core.kustomize', dir='roles/rhsso_oauth/files/rhsso-operator/base/') }}"  
+# - name: Install RHSSO Operator 
+#   k8s:
+#     api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
+#     host: "{{ managed_cluster_server }}"
+#     definition: "{{ lookup('kubernetes.core.kustomize', dir='roles/rhsso_oauth/files/rhsso-operator/base/') }}"  
 
-- name: Wait until the Operator is ready
-  k8s_info:
-    api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
-    host: "{{ managed_cluster_server }}"
-    validate_certs: no
-    kind: Subscription
-    api_version: operators.coreos.com/v1alpha1
-    name: rhsso-operator
-    namespace: sso
-    wait: yes
-    wait_condition:
-      type: CatalogSourcesUnhealthy
-      status: False
+# - name: Wait until the Operator is ready
+#   k8s_info:
+#     api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
+#     host: "{{ managed_cluster_server }}"
+#     validate_certs: no
+#     kind: Subscription
+#     api_version: operators.coreos.com/v1alpha1
+#     name: rhsso-operator
+#     namespace: sso
+#     wait: yes
+#     wait_condition:
+#       type: CatalogSourcesUnhealthy
+#       status: False
 
-- name: Sleep for 60 seconds
-  shell:
-    cmd: sleep 60
+# - name: Sleep for 60 seconds
+#   shell:
+#     cmd: sleep 60
 
-- name: Create Keycloak instance
-  k8s:
-    api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
-    host: "{{ managed_cluster_server }}"
-    validate_certs: no 
-    state: present
-    name: keycloak-instance
-    namespace: sso
-    definition:
-      kind: Keycloak
-      apiVersion: keycloak.org/v1alpha1
-      metadata:
-        name: "{{ managed_cluster_name }}-keycloak"
-        labels:
-          app: sso
-        namespace: sso
-      spec:
-        instances: 1
-        externalAccess:
-          enabled: true
+# - name: Create Keycloak instance
+#   k8s:
+#     api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
+#     host: "{{ managed_cluster_server }}"
+#     validate_certs: no 
+#     state: present
+#     name: keycloak-instance
+#     namespace: sso
+#     definition:
+#       kind: Keycloak
+#       apiVersion: keycloak.org/v1alpha1
+#       metadata:
+#         name: "{{ managed_cluster_name }}-keycloak"
+#         labels:
+#           app: sso
+#         namespace: sso
+#       spec:
+#         instances: 1
+#         externalAccess:
+#           enabled: true
 
-- name: Wait until Keycloak is ready 
-  k8s_info:
-    api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
-    host: "{{ managed_cluster_server }}"
-    validate_certs: no
-    kind: Pod
-    api_version: v1
-    name: keycloak-0
-    namespace: sso
-    wait: yes
-    wait_timeout: 240
-    wait_condition:
-      type: Ready
-      status: 'True'
+# - name: Wait until Keycloak is ready 
+#   k8s_info:
+#     api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
+#     host: "{{ managed_cluster_server }}"
+#     validate_certs: no
+#     kind: Pod
+#     api_version: v1
+#     name: keycloak-0
+#     namespace: sso
+#     wait: yes
+#     wait_timeout: 240
+#     wait_condition:
+#       type: Ready
+#       status: 'True'
     
-- name: Create Keycloak Realm
-  k8s:
-    api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
-    host: "{{ managed_cluster_server }}"
-    validate_certs: no
-    state: present
-    name: openshift-realm
-    namespace: sso
-    definition:
-      kind: KeycloakRealm
-      apiVersion: keycloak.org/v1alpha1
-      metadata:
-        labels:
-          app: sso
-      spec:
-        instanceSelector:
-          matchLabels:
-            app: sso
-        realm:
-          clients:
-            - enabled: true
-              clientAuthenticatorType: client-secret
-              redirectUris:
-                - >-
-                  https://oauth-openshift.apps.{{ managed_cluster_name }}.{{ domain_name }}/oauth2callback/rh-sso
-              clientId: openshift
-              implicitFlowEnabled: false
-              secret: "{{ keycloak_client_secret }}"
-              publicClient: false
-              standardFlowEnabled: true
-              directAccessGrantsEnabled: false
-          displayName: openshift
-          enabled: true
-          id: openshift
-          identityProviders:
-            - alias: github
-              config:
-                clientId: "{{ oauth_client_id }}"
-                clientSecret: "{{ oauth_client_secret }}"
-                syncMode: IMPORT
-                useJwksUrl: 'true'
-              enabled: true
-              firstBrokerLoginFlowAlias: first broker login
-              providerId: github
-          realm: openshift
-
-- name: Create secret from Keycloak Client
-  k8s:
-    api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
-    host: "{{ managed_cluster_server }}"
-    validate_certs: no
-    state: present
-    definition:
-      apiVersion: v1
-      data:
-        clientSecret: "{{ keycloak_client_secret | b64encode }}"
-      kind: Secret
-      metadata:
-        name: "{{ managed_cluster_name }}-openid-client-secret"
-        namespace: openshift-config
-      type: Opaque
-
-- name: Get router-ca secret info
-  k8s_info:
-    api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
-    host: "{{ managed_cluster_server }}"
-    validate_certs: no
-    api_version: v1
-    kind: Secret
-    name: router-ca
-    namespace: openshift-ingress-operator
-  register: router_ca_secret
-
-- name: Parse through the router-ca secret info
-  set_fact:
-    tls_crt: "{{ item.data['tls.crt'] }}"
-  with_items: "{{ router_ca_secret.resources }}"
-  no_log: true
-
-- name: Create ConfigMap from tls.crt for OAuth
-  k8s:
-    api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
-    host: "{{ managed_cluster_server }}"
-    validate_certs: no
-    state: present
-    name: "{{ managed_cluster_name }}-openid-ca"
-    kind: ConfigMap
-    namespace: openshift-config
-    definition:
-      apiVersion: v1
-      data:
-        ca.crt: |
-          {{ tls_crt | b64decode }}
-
-# - name: Create Keycloak User
+# - name: Create Keycloak Realm
 #   k8s:
 #     api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
 #     host: "{{ managed_cluster_server }}"
 #     validate_certs: no
 #     state: present
-#     name: KeycloakUser
+#     name: openshift-realm
 #     namespace: sso
 #     definition:
+#       kind: KeycloakRealm
 #       apiVersion: keycloak.org/v1alpha1
-#       kind: KeycloakUser
 #       metadata:
-#         name: sha-dmin
-#         namespace: sso
 #         labels:
 #           app: sso
 #       spec:
-        # realmSelector:
-        #   matchLabels:
-        #     app: sso
-        # user:
-        #   credentials:
-        #     - type: password
-        #       value: redhat
-        #   email: user@example.com
-        #   enabled: true
-        #   firstName: shadowman
-        #   username: shadowman
+#         instanceSelector:
+#           matchLabels:
+#             app: sso
+#         realm:
+#           clients:
+#             - enabled: true
+#               clientAuthenticatorType: client-secret
+#               redirectUris:
+#                 - >-
+#                   https://oauth-openshift.apps.{{ managed_cluster_name }}.{{ domain_name }}/oauth2callback/rh-sso
+#               clientId: openshift
+#               implicitFlowEnabled: false
+#               secret: "{{ keycloak_client_secret }}"
+#               publicClient: false
+#               standardFlowEnabled: true
+#               directAccessGrantsEnabled: false
+#           displayName: openshift
+#           enabled: true
+#           id: openshift
+#           identityProviders:
+#             - alias: github
+#               config:
+#                 clientId: "{{ oauth_client_id }}"
+#                 clientSecret: "{{ oauth_client_secret }}"
+#                 syncMode: IMPORT
+#                 useJwksUrl: 'true'
+#               enabled: true
+#               firstBrokerLoginFlowAlias: first broker login
+#               providerId: github
+#           realm: openshift
+
+# - name: Create secret from Keycloak Client
+#   k8s:
+#     api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
+#     host: "{{ managed_cluster_server }}"
+#     validate_certs: no
+#     state: present
+#     definition:
+#       apiVersion: v1
+#       data:
+#         clientSecret: "{{ keycloak_client_secret | b64encode }}"
+#       kind: Secret
+#       metadata:
+#         name: "{{ managed_cluster_name }}-openid-client-secret"
+#         namespace: openshift-config
+#       type: Opaque
+
+# - name: Get router-ca secret info
+#   k8s_info:
+#     api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
+#     host: "{{ managed_cluster_server }}"
+#     validate_certs: no
+#     api_version: v1
+#     kind: Secret
+#     name: router-ca
+#     namespace: openshift-ingress-operator
+#   register: router_ca_secret
+
+# - name: Parse through the router-ca secret info
+#   set_fact:
+#     tls_crt: "{{ item.data['tls.crt'] }}"
+#   with_items: "{{ router_ca_secret.resources }}"
+#   no_log: true
+
+# - name: Create ConfigMap from tls.crt for OAuth
+#   k8s:
+#     api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
+#     host: "{{ managed_cluster_server }}"
+#     validate_certs: no
+#     state: present
+#     name: "{{ managed_cluster_name }}-openid-ca"
+#     kind: ConfigMap
+#     namespace: openshift-config
+#     definition:
+#       apiVersion: v1
+#       data:
+#         ca.crt: |
+#           {{ tls_crt | b64decode }}
+
+# # - name: Create Keycloak User
+# #   k8s:
+# #     api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
+# #     host: "{{ managed_cluster_server }}"
+# #     validate_certs: no
+# #     state: present
+# #     name: KeycloakUser
+# #     namespace: sso
+# #     definition:
+# #       apiVersion: keycloak.org/v1alpha1
+# #       kind: KeycloakUser
+# #       metadata:
+# #         name: sha-dmin
+# #         namespace: sso
+# #         labels:
+# #           app: sso
+# #       spec:
+#         # realmSelector:
+#         #   matchLabels:
+#         #     app: sso
+#         # user:
+#         #   credentials:
+#         #     - type: password
+#         #       value: redhat
+#         #   email: user@example.com
+#         #   enabled: true
+#         #   firstName: shadowman
+#         #   username: shadowman
 
 - name: Create OAuth resource
   k8s:
@@ -222,9 +222,13 @@
                 https://keycloak-sso.apps.{{ managed_cluster_name }}.{{ domain_name }}/auth/realms/openshift
             type: OpenID
 
+- name: Trigger OAuth deployment
+  shell:
+    cmd: oc rollout restart deployment oauth-openshift -n openshift-authentication
+
 - name: Wait for Oauth pods to re-deploy
   shell:
-    cmd: sleep 240
+    cmd: sleep 150
 
 - name: Get console config map info
   k8s_info:
