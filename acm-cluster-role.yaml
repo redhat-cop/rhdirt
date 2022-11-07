@@ -6,11 +6,11 @@
       api_key: "{{ acm_hub_service_account }}"
       host: "{{ acm_hub_server }}"
       validate_certs: no
-  
-- import_role: roles/acm_managed_cluster_create
+  tasks:  
+    - import_role: roles/acm_managed_cluster_create
 
-- import_role: roles/managed_cluster_login
-  when: acm_create | bool
+    - import_role: roles/managed_cluster_login
+      when: acm_create | bool
 
-- import_role: roles/rhsso_oauth
-  when: acm_remove | bool
+    - import_role: roles/rhsso_oauth
+      when: acm_remove | bool
