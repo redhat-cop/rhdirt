@@ -7,7 +7,7 @@
     state: absent
     name: openshift-realm
     kind: KeycloakRealm
-    apiVersion: keycloak.org/v1alpha1
+    api_version: keycloak.org/v1alpha1
     namespace: sso
 
 - name: Allow Realm to be removed from api
