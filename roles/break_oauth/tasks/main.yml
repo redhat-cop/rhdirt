@@ -1,38 +1,63 @@
 ---
-- name: Create Broken OAuth resource
+- name: Remove the functional Realm
+  k8s:
+    api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
+    host: "{{ managed_cluster_server }}"
+    validate_certs: no
+    state: absent
+    name: openshift-realm
+    kind: KeycloakRealm
+    namespace: sso
+
+- name: Allow Realm to be removed from api_
+  shell:
+    cmd: sleep 15 
+
+- name: Create Keycloak Realm - typo in redirectUri
   k8s:
     api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
     host: "{{ managed_cluster_server }}"
     validate_certs: no
     state: present
-    kind: OAuth
-    name: cluster
-    namespace: openshift-config
+    name: openshift-realm
+    namespace: sso
     definition:
-      apiVersion: config.openshift.io/v1
+      kind: KeycloakRealm
+      apiVersion: keycloak.org/v1alpha1
       metadata:
-        name: cluster
+        labels:
+          app: sso
       spec:
-        identityProviders:
-          - mappingMethod: claim
-            name: rh-sso
-            openID:
-              ca:
-                name: "{{ managed_cluster_name }}-openid-ca"
-              claims:
-                email:
-                  - email
-                name:
-                  - name
-                preferredUsername:
-                  - preferred_username
-              clientID: openshifttt
-              clientSecret:
-                name: "{{ managed_cluster_name }}-openid-client-secrettypo"
-              extraScopes: []
-              issuer: >-
-                https://keycloak-sso.apps.{{ managed_cluster_name }}.{{ domain_name }}/auth/realms/openshift
-            type: OpenID
+        instanceSelector:
+          matchLabels:
+            app: sso
+        realm:
+          clients:
+            - enabled: true
+              clientAuthenticatorType: client-secret
+              redirectUris:
+                - >-
+                  https://oauth-openshift.apps.{{ managed_cluster_name }}.typo.dev/oauth2callback/rh-sso
+              clientId: openshift
+              implicitFlowEnabled: false
+              secret: "{{ keycloak_client_secret }}"
+              publicClient: false
+              standardFlowEnabled: true
+              directAccessGrantsEnabled: false
+          displayName: openshift
+          enabled: true
+          id: openshift
+          identityProviders:
+            - alias: github
+              config:
+                clientId: "{{ oauth_client_id }}"
+                clientSecret: "{{ oauth_client_secret }}"
+                syncMode: IMPORT
+                useJwksUrl: 'true'
+              enabled: true
+              firstBrokerLoginFlowAlias: first broker login
+              providerId: github
+          realm: openshift
 
 # - name: Remove kubeadmin secret
 #   k8s:
