@@ -4,7 +4,7 @@
 
 2. Navigate to Keycloak Operator or the Keycloak Admin console (credentials may be found in the sso namespace -> Secrets -> credential-{{managed_cluster_name}}-keycloak )
 
-3. Navigate to OpenShift Realm
+3. Navigate to OpenShift Realm -> Openshift client
 
 4. If in Keycloak Admin Console, change the the redirect URI to "dragonslair" instead of "typo"
 
