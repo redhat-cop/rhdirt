@@ -1,15 +1,15 @@
-- name: Login with openshift
-  shell:
-    cmd: oc login --token="{{ acm_hub_service_account }}" --server="{{ acm_hub_server }}"  --insecure-skip-tls-verify=true
+# - name: Login with openshift
+#   shell:
+#     cmd: oc login --token="{{ acm_hub_service_account }}" --server="{{ acm_hub_server }}"  --insecure-skip-tls-verify=true
 
-- name: Remove cluster from ACM
-  shell:
-    cmd: oc delete clusterdeployment.hive.openshift.io/"{{ managed_cluster_name }}" -n {{ managed_cluster_name }}
+# - name: Remove cluster from ACM
+#   shell:
+#     cmd: oc delete clusterdeployment.hive.openshift.io/"{{ managed_cluster_name }}" -n {{ managed_cluster_name }}
 
-- name: Remove management from ACM
-  shell:
-    cmd: oc delete managedclusters.cluster.open-cluster-management.io/"{{ managed_cluster_name }}" 
+# - name: Remove management from ACM
+#   shell:
+#     cmd: oc delete managedclusters.cluster.open-cluster-management.io/"{{ managed_cluster_name }}" 
 
-- name: Delete project "{{ managed_cluster_name }}""
-  shell:
-    cmd: oc delete project "{{ managed_cluster_name }}"
+# - name: Delete project "{{ managed_cluster_name }}""
+#   shell:
+#     cmd: oc delete project "{{ managed_cluster_name }}"
