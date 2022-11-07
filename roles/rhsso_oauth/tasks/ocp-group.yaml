@@ -1,9 +1,15 @@
+- shell:
+   cmd: pwd
+   
+- shell:
+    cmd: sleep 1000
+
 - name: Create hack-a-thon participants Group
   k8s:
     api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
     host: "{{ managed_cluster_server }}"
     state: present
-    src: "{{ hackathon-participants_path }}"
+    src: "{{ hackathon_participants_path }}"
 
 - name: Create cluster-admin RoleBinding for the group
   k8s:    
