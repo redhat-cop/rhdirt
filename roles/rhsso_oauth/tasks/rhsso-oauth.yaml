@@ -222,6 +222,8 @@
                 https://keycloak-sso.apps.{{ managed_cluster_name }}.{{ domain_name }}/auth/realms/openshift
             type: OpenID
 
+- shell:
+   cmd: oc login -u kubeadmin {{ managed_cluster_admin_password }} --server={{ managed_cluster_server }}
 - name: Trigger OAuth deployment
   shell:
     cmd: oc rollout restart deployment oauth-openshift -n openshift-authentication
