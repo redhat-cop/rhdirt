@@ -7,10 +7,10 @@
       host: "{{ acm_hub_server }}"
       validate_certs: no
   
-- import_roles: roles/acm_managed_cluster_create
+- import_role: roles/acm_managed_cluster_create
 
-- import_roles: roles/managed_cluster_login
+- import_role: roles/managed_cluster_login
   when: acm_create | bool
 
-- import_roles: roles/rhsso_oauth
+- import_role: roles/rhsso_oauth
   when: acm_remove | bool
