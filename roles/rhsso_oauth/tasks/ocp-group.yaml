@@ -1,8 +1,8 @@
 - shell:
    cmd: pwd
-   
-- shell:
-    cmd: sleep 1000
+
+# - shell:
+#     cmd: sleep 1000
 
 - name: Create hack-a-thon participants Group
   k8s:
