@@ -1,0 +1,14 @@
+all:
+  hosts:
+    localhost:
+      managed_cluster_name: basilisk
+      pull_secret: "{{ lookup('aws_ssm','/' + managed_cluster_name + '/pull_secret') }}"
+      hackathon_participants_path: hackathon-participants.yaml
+      ssh_private_key: "{{ lookup('aws_ssm','/' + managed_cluster_name + '/ssh_private_key') }}"
+      ssh_public_key: "{{ lookup('aws_ssm','/' + managed_cluster_name + '/ssh_public_key') }}"
+      aws_access_key_id: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
+      aws_secret_access_key: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
+      curator_token: "{{ lookup('aws_ssm','/' + managed_cluster_name + '/curator_token') }}"
+      aap_host: "{{ lookup('aws_ssm','/' + managed_cluster_name + '/app_host') }}"
+      ansible_tower_template_name: "{{ lookup('aws_ssm','/' + managed_cluster_name + '/ansible_tower_template_name') }}"
+    
