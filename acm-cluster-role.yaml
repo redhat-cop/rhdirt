@@ -1,6 +1,6 @@
 ---
 
-- hosts: localhost
+- hosts: all
   module_defaults:
     group/k8s:
       api_key: "{{ acm_hub_service_account }}"
