@@ -2,16 +2,16 @@ all:
   hosts:
     localhost:
       managed_cluster_name: basilisk
-      pull_secret: "{{ lookup('aws_ssm','/' + managed_cluster_name + '/pull_secret') }}"
+      pull_secret: "{{ lookup('aws_ssm','/' + managed_cluster_name + '/pull_secret', region='us-east-2') }}"
       hackathon_participants_path: hackathon-participants.yaml
-      ssh_private_key: "{{ lookup('aws_ssm','/' + managed_cluster_name + '/ssh_private_key') }}"
-      ssh_public_key: "{{ lookup('aws_ssm','/' + managed_cluster_name + '/ssh_public_key') }}"
+      ssh_private_key: "{{ lookup('aws_ssm','/' + managed_cluster_name + '/ssh_private_key', region='us-east-2') }}"
+      ssh_public_key: "{{ lookup('aws_ssm','/' + managed_cluster_name + '/ssh_public_key', region='us-east-2') }}"
       aws_access_key_id: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
       aws_secret_access_key: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
-      curator_token: "{{ lookup('aws_ssm','/' + managed_cluster_name + '/curator_token') }}"
-      aap_host: "{{ lookup('aws_ssm','/' + managed_cluster_name + '/app_host') }}"
-      ansible_tower_template_name: "{{ lookup('aws_ssm','/' + managed_cluster_name + '/ansible_tower_template_name') }}"
+      curator_token: "{{ lookup('aws_ssm','/' + managed_cluster_name + '/curator_token', region='us-east-2') }}"
+      aap_host: "{{ lookup('aws_ssm','/' + managed_cluster_name + '/app_host', region='us-east-2') }}"
+      ansible_tower_template_name: "{{ lookup('aws_ssm','/' + managed_cluster_name + '/ansible_tower_template_name', region='us-east-2') }}"
       install_config: "{{ lookup('template','/home/ec2-user/cluster-create-aap/roles/acm_managed_cluster_create/templates/install-config.yaml.j2') }}"
-      acm_hub_service_account: "{{ lookup('aws_ssm','/' + managed_cluster_name + '/acm_hub_service_account') }}"
-      acm_hub_server: "{{ lookup('aws_ssm','/' + managed_cluster_name + '/acm_hub_service_account') }}"
-      domain_name: "{{ lookup('aws_ssm','/' + managed_cluster_name + '/domain_name') }}"
+      acm_hub_service_account: "{{ lookup('aws_ssm','/' + managed_cluster_name + '/acm_hub_service_account', region='us-east-2') }}"
+      acm_hub_server: "{{ lookup('aws_ssm','/' + managed_cluster_name + '/acm_hub_service_account', region='us-east-2') }}"
+      domain_name: "{{ lookup('aws_ssm','/' + managed_cluster_name + '/domain_name', region='us-east-2') }}"
