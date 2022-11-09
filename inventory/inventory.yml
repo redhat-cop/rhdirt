@@ -11,4 +11,7 @@ all:
       curator_token: "{{ lookup('aws_ssm','/' + managed_cluster_name + '/curator_token') }}"
       aap_host: "{{ lookup('aws_ssm','/' + managed_cluster_name + '/app_host') }}"
       ansible_tower_template_name: "{{ lookup('aws_ssm','/' + managed_cluster_name + '/ansible_tower_template_name') }}"
-    
+      install_config: "{{ lookup('template','/home/ec2-user/cluster-create-aap/roles/acm_managed_cluster_create/templates/install-config.yaml.j2') }}"
+      acm_hub_service_account: "{{ lookup('aws_ssm','/' + managed_cluster_name + '/acm_hub_service_account') }}"
+      acm_hub_server: "{{ lookup('aws_ssm','/' + managed_cluster_name + '/acm_hub_service_account') }}"
+      domain_name: "{{ lookup('aws_ssm','/' + managed_cluster_name + '/domain_name') }}"
