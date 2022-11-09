@@ -7,8 +7,8 @@
       host: "{{ acm_hub_server }}"
       validate_certs: no
   tasks:  
-    - import_role: 
-        name: roles/acm_managed_cluster_create
+    # - import_role: 
+    #     name: roles/acm_managed_cluster_create
 
     - import_role: 
         name: roles/managed_cluster_login
