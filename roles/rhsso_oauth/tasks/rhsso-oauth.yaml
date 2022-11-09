@@ -134,7 +134,7 @@
       apiVersion: v1
       data:
         ca.crt: |
-          {{ ca_bundle | b64decode }}
+          {{ ca_bundle }}
 
 - name: Create secret from Keycloak Client on {{ managed_cluster_name }}
   k8s:
