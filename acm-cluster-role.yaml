@@ -7,8 +7,8 @@
       host: "{{ acm_hub_server }}"
       validate_certs: no
   tasks:  
-    # - import_role: 
-    #   name: roles/acm_managed_cluster_create
+    - import_role: 
+      name: roles/acm_managed_cluster_create
 
     - import_role: 
         name: roles/managed_cluster_login
@@ -18,6 +18,6 @@
         name: roles/cert_manager
       when: acm_create | bool
 
-    # - import_role: 
-    #    name: roles/rhsso_oauth
-    #   when: acm_create | bool
+    - import_role: 
+       name: roles/rhsso_oauth
+      when: acm_create | bool
