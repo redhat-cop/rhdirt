@@ -1,0 +1,3 @@
+---
+- name: import tasks
+  import_tasks: cert-manager-install.yaml

@@ -1,0 +1,102 @@
+---
+- name: Install Certificate Manager Operator on "{{ managed_cluster_name }}" (if not installed already)
+  k8s:
+    host: "{{ managed_cluster_server }}"
+    api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
+    definition: "{{ lookup('kubernetes.core.kustomize', dir='roles/cert-manager/files/base/') }}"
+
+#configuration
+- name: configure CertManager config override
+  k8s:
+    api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
+    host: "{{ managed_cluster_server }}"
+    validate_certs: no
+    apply: yes
+    name: cluster
+    kind: CertManager
+    definition:
+      apiVersion: operator.openshift.io/v1alpha1
+      metadata:
+        name: cluster
+      spec:
+        logLevel: Normal
+        managementState: Managed
+        observedConfig: null
+        operatorLogLevel: Normal
+        unsupportedConfigOverrides:
+          controller:
+            args:
+              - '--cluster-resource-namespace=$(POD_NAMESPACE)'
+              - '--dns01-recursive-nameservers=1.1.1.1:53'
+              - '--dns01-recursive-nameservers-only'
+
+- name: Create ClusterIssuer Secret
+  k8s:
+    api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
+    host: "{{ managed_cluster_server }}"
+    validate_certs: no
+    apply: yes
+    name: prod-route53-credentials-secret
+    definition:
+      kind: Secret
+      apiVersion: v1
+      metadata:
+        name: prod-route53-credentials-secret
+        namespace: openshift-cert-manager
+      data:
+        SECRET_ACCESS_KEY: "{{  dns_secret }}"
+      type: Opaque
+- name: Create ClusterIssuer
+  k8s:
+    api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
+    host: "{{ managed_cluster_server }}"
+    validate_certs: no
+    apply: yes
+    name: letsencrypt
+    definition:
+      apiVersion: cert-manager.io/v1
+      kind: ClusterIssuer
+      metadata:
+        name: letsencrypt
+      spec:
+        acme:
+          email: juwalker@redhat.com
+          preferredChain: ''
+          privateKeySecretRef:
+            name: letsencrypt
+          server: 'https://acme-v02.api.letsencrypt.org/directory'
+          solvers:
+            - dns01:
+                route53:
+                  accessKeyID: "{{ dns_access_key }}"
+                  hostedZoneID: "{{ dns_zone_id }}"
+                  region: us-east-2
+                  secretAccessKeySecretRef:
+                    key: SECRET_ACCESS_KEY
+                    name: prod-route53-credentials-secret
+              selector:
+                dnsZones:
+                  - dragonslair.dev
+                  - "{{ managed_cluster_name }}.{{ domain_name }}"
+- name: Create Certificate For Wildcard And API
+  k8s:
+    api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
+    host: "{{ managed_cluster_server }}"
+    validate_certs: no
+    apply: yes
+    name: "{{ managed_cluster_name }}.{{ domain_name }}"
+    definition:
+      apiVersion: cert-manager.io/v1
+      kind: Certificate
+      metadata:
+        name: "{{ managed_cluster_name }}.{{ domain_name }}"
+        namespace: openshift-ingress
+      spec:
+        dnsNames:
+          - '*.apps.{{ managed_cluster_name }}.{{ domain_name }}'
+          - api.{{ managed_cluster_name }}.{{ domain_name }}
+        issuerRef:
+          group: cert-manager.io
+          kind: ClusterIssuer
+          name: letsencrypt
+        secretName: wildcard-apps-{{ managed_cluster_name }}.{{ domain_name }}
