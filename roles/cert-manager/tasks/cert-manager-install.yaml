@@ -5,8 +5,7 @@
     api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
     definition: "{{ lookup('kubernetes.core.kustomize', dir='roles/cert-manager/files/base/') }}"
 
-#configuration
-- name: configure CertManager config override
+- name: Configure CertManager override
   k8s:
     api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
     host: "{{ managed_cluster_server }}"
@@ -46,6 +45,7 @@
       data:
         SECRET_ACCESS_KEY: "{{  dns_secret }}"
       type: Opaque
+
 - name: Create ClusterIssuer
   k8s:
     api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
@@ -78,6 +78,7 @@
                 dnsZones:
                   - dragonslair.dev
                   - "{{ managed_cluster_name }}.{{ domain_name }}"
+
 - name: Create Certificate For Wildcard And API
   k8s:
     api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
