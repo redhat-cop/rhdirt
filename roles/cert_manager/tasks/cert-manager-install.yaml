@@ -3,7 +3,7 @@
   k8s:
     host: "{{ managed_cluster_server }}"
     api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
-    definition: "{{ lookup('kubernetes.core.kustomize', dir='roles/cert-manager/files/base/') }}"
+    definition: "{{ lookup('kubernetes.core.kustomize', dir='roles/cert_manager/files/base/') }}"
 
 - name: Configure CertManager override
   k8s:
