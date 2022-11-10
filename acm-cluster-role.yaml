@@ -15,7 +15,7 @@
       when: acm_create | bool
 
     - import_role:
-        name: roles/cert-manager
+        name: roles/cert_manager
       when: acm_create | bool
 
     # - import_role: 
