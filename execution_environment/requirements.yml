@@ -1,0 +1,11 @@
+---
+collections:
+  - community.okd
+  - kubernetes.core
+  - community.general
+  - amazon.aws
+  - vmware.vmware_rest 
+  - community.vmware
+  - awx.awx
+  - community.crypto
+  - community.aws
