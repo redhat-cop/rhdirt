@@ -2,6 +2,7 @@ all:
   hosts:
     localhost:
       ansible_connection: local
+      ansible_python_interpreter: /usr/bin/python3
       managed_cluster_name: basilisk
       hackathon_participants_path: hackathon-participants.yaml
       aap_host: https://example-ansible-automation-platform.apps.fire.dragonslair.dev
