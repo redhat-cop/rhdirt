@@ -5,6 +5,21 @@
     api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
     definition: "{{ lookup('kubernetes.core.kustomize', dir='roles/cert_manager/files/base/') }}"
 
+- name: Wait until the Operator is ready
+  k8s_info:
+    kind: Subscription
+    api_version: operators.coreos.com/v1alpha1
+    name: openshift-cert-manager-operator
+    namespace: openshift-cert-manager-operator
+    wait: yes
+    wait_condition:
+      type: CatalogSourcesUnhealthy
+      status: False
+
+- name: Sleep for 30 seconds to ensure API server is updated/ready 
+  shell:
+    cmd: sleep 30
+
 - name: Configure CertManager override
   k8s:
     api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
