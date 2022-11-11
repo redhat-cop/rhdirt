@@ -121,7 +121,7 @@
           name: letsencrypt
         secretName: "wildcard-apps-{{ managed_cluster_name }}.{{ domain_name }}"
 
-- name: Configure CertManager override
+- name: Patch ingress controller to use new certifcate
   k8s:
     api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
     host: "{{ managed_cluster_server }}"
@@ -133,4 +133,4 @@
     definition:
       spec:
         defaultCertificate:
-          name: "wildcard-apps-{{ managed_cluster-name }}.{{ domain_name }}"
+          name: "wildcard-apps-{{ managed_cluster_name }}.{{ domain_name }}"
