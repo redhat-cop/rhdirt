@@ -3,7 +3,7 @@ all:
     localhost:
       ansible_connection: local
       ansible_python_interpreter: /usr/bin/python3
-      managed_cluster_name: basilisk
+      managed_cluster_name: hydra
       hackathon_participants_path: hackathon-participants.yaml
       aap_host: https://example-ansible-automation-platform.apps.fire.dragonslair.dev
       domain_name: dragonslair.dev
