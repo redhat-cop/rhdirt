@@ -16,10 +16,6 @@
       type: CatalogSourcesUnhealthy
       status: False
 
-- name: Sleep for 30 seconds to ensure API server is updated/ready 
-  shell:
-    cmd: sleep 30
-
 - name: Configure CertManager override
   k8s:
     api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
@@ -43,6 +39,10 @@
               - '--cluster-resource-namespace=$(POD_NAMESPACE)'
               - '--dns01-recursive-nameservers=1.1.1.1:53'
               - '--dns01-recursive-nameservers-only'
+  register: override_result
+  until: "override_result is not failed"
+  retries: 10
+  delay: 10
 
 - name: Create ClusterIssuer Secret
   k8s:
@@ -60,6 +60,10 @@
       data:
         SECRET_ACCESS_KEY: "{{  dns_secret }}"
       type: Opaque
+  register: secret_result
+  until: "secret_result is not failed"
+  retries: 10
+  delay: 10
 
 - name: Create ClusterIssuer
   k8s:
@@ -115,4 +119,18 @@
           group: cert-manager.io
           kind: ClusterIssuer
           name: letsencrypt
-        secretName: wildcard-apps-{{ managed_cluster_name }}.{{ domain_name }}
+        secretName: "wildcard-apps-{{ managed_cluster_name }}.{{ domain_name }}"
+
+- name: Configure CertManager override
+  k8s:
+    api_key: "{{ openshift_auth_results.k8s_auth.api_key }}"
+    host: "{{ managed_cluster_server }}"
+    validate_certs: no
+    apply: yes
+    name: default
+    kind: ingresscontroller.operator
+    namespace: openshift-ingress-operator
+    definition:
+      spec:
+        defaultCertificate:
+          name: "wildcard-apps-{{ managed_cluster-name }}.{{ domain_name }}"
