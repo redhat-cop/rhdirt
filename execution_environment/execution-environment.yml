@@ -13,6 +13,7 @@ additional_build_steps:
     RUN wget https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz
     RUN tar xvzf openshift-client-linux.tar.gz
     RUN chmod +x oc
+    RUN chmod +x kubectl
+    RUN mv kubectl /usr/bin/kubectl
     RUN mv oc /usr/bin/oc
-    RUN oc version
     ENV PATH "/usr/bin:$PATH"
