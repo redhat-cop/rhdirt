@@ -70,7 +70,7 @@
               clientAuthenticatorType: client-secret
               redirectUris:
                 - >-
-                  https://oauth-openshift.apps.{{ managed_cluster_name }}.{{ domain_name }}/oauth2callback/rh-sso
+                  https://oauth-openshift.apps.fire.{{ domain_name }}/oauth2callback/rh-sso
               clientId: openshift
               implicitFlowEnabled: false
               secret: "{{ keycloak_client_secret }}"
@@ -93,18 +93,32 @@
           realm: openshift
 
 
-- name: Get router-ca secret info from Hub Cluster
+# - name: Get router-ca secret info from Hub Cluster
+#   k8s_info:
+#     api_version: v1
+#     kind: Secret
+#     name: router-ca
+#     namespace: openshift-ingress-operator
+#   register: router_ca_secret
+
+# - name: Parse through the router-ca secret info
+#   set_fact:
+#     tls_crt: "{{ item.data['tls.crt'] }}"
+#   with_items: "{{ router_ca_secret.resources }}"
+#   no_log: true
+
+- name: Get custom-bundle info from Hub Cluster
   k8s_info:
     api_version: v1
-    kind: Secret
-    name: router-ca
-    namespace: openshift-ingress-operator
-  register: router_ca_secret
+    kind: ConfigMap
+    name: custom-ca
+    namespace: openshift-config
+  register: custom_ca
 
-- name: Parse through the router-ca secret info
+- name: Save the custom-bundle for use on {{ managed_cluster }}
   set_fact:
-    tls_crt: "{{ item.data['tls.crt'] }}"
-  with_items: "{{ router_ca_secret.resources }}"
+    ca_bundle: "{{ item.data['ca-bundle.crt'] }}"
+  with_items: "{{ custom_ca.resources }}"
   no_log: true
 
 - name: Create ConfigMap on {{ managed_cluster_name }} cluster from Hub's router-ca tls.crt 
@@ -120,7 +134,7 @@
       apiVersion: v1
       data:
         ca.crt: |
-          {{ tls_crt | b64decode }}
+          {{ ca_bundle }}
 
 - name: Create secret from Keycloak Client on {{ managed_cluster_name }}
   k8s:
