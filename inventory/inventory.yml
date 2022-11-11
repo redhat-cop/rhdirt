@@ -7,6 +7,8 @@ all:
       hackathon_participants_path: hackathon-participants.yaml
       aap_host: https://example-ansible-automation-platform.apps.fire.dragonslair.dev
       domain_name: dragonslair.dev
+      aws_region: us-east-1
+      base_install_image: img4.11.12-x86-64-appsub
       ansible_tower_template_name: rhsso-github-setup
       acm_hub_server: https://api.fire.dragonslair.dev:6443
       aws_access_key_id: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
