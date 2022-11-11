@@ -128,7 +128,7 @@
     validate_certs: no
     apply: yes
     name: default
-    kind: ingresscontroller.operator
+    kind: IngressController
     namespace: openshift-ingress-operator
     definition:
       spec:
