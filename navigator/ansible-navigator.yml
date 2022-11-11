@@ -1,0 +1,23 @@
+# # cspell:ignore cmdline, workdir
+---
+ansible-navigator:
+  ansible:
+    playbook:
+      path: ../acm-cluster-role.yaml
+    inventory:
+      entries:
+      - /home/ec2-user/dirt/inventory/inventory.yml 
+  app: run
+  execution-environment:
+    container-engine: podman
+    environment-variables:
+      pass:
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+    image: quay.io/hfenner/ee_terraform:latest
+  logging:
+    level: critical
+    file: /dev/null
+  mode: stdout
+  playbook-artifact:
+    enable: False
