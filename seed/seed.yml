@@ -1,0 +1,63 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    aws_region: us-east-2
+    nolog: True
+    state: present
+    env: viper
+
+  tasks:
+  - name: Populate SSH key if exists
+    ansible.builtin.copy:
+      content: "{{ item.content }}"
+      mode: "{{ item.mode }}"
+      dest: "{{ item.dest }}"
+    when: ssh_private_key
+    loop:
+    - content: "{{ ssh_private_key }}"
+      dest: /tmp/keypair
+      mode: '0600'
+    - content: "{{ ssh_public_key }}"
+      dest: /tmp/keypair.pub
+      mode: '0644'
+    vars:
+      ssh_private_key: "{{ lookup('aws_ssm', '/' + env + '/ssh_private_key', region=aws_region, on_missing='skip') }}"
+      ssh_public_key: "{{ lookup('aws_ssm', '/' + env + '/ssh_public_key', region=aws_region, on_missing='skip') }}"
+    no_log: "{{ nolog }}"
+
+  - name: Create or validate SSH Key
+    community.crypto.openssh_keypair:
+      path: /tmp/keypair
+      state: "{{ state }}"
+    no_log: "{{ nolog }}"
+
+  - name: Create or delete SSH key parameter
+    community.aws.ssm_parameter:
+      name: "/{{ env }}/{{ item.name }}"
+      description: "{{ item.description }}"
+      string_type: "SecureString"
+      region: "{{ aws_region }}"
+      value: "{{ item.value }}"
+      state: "{{ state }}"
+    loop:
+    - name: ssh_private_key
+      description: "{{ env }} SSH Private Key"
+      value: "{{ lookup('file', '/tmp/keypair', rstrip=False, errors='ignore') }}"
+    - name: ssh_public_key
+      description: "{{ env }} SSH Public Key"
+      value: "{{ lookup('file', '/tmp/keypair.pub', rstrip=False, errors='ignore') }}"
+    no_log: "{{ nolog }}"
+
+  - name: Create or delete seed parameters
+    community.aws.ssm_parameter:
+      name: "/{{ env }}/{{ item.name }}"
+      description: "{{ item.description }}"
+      string_type: "SecureString"
+      region: "{{ aws_region }}"
+      value: "{{ item.value }}"
+      state: "{{ state }}"
+    loop: "{{ seed }}"
+    no_log: "{{ nolog }}"
