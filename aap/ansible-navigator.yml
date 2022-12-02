@@ -1,0 +1,25 @@
+# # cspell:ignore cmdline, workdir
+# You must `export DIRT_REPO=/path/to/repo` to use this 
+# file.
+---
+ansible-navigator:
+  ansible:
+    playbook:
+      path: ${REPO}/aap/ec2instance.yml
+    inventory:
+      entries:
+      - ${REPO}/aap/inventory/
+  app: run
+  execution-environment:
+    container-engine: podman
+    environment-variables:
+      pass:
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+    image: quay.io/hfenner/ee_terraform:latest
+  logging:
+    level: critical
+    file: /dev/null
+  mode: stdout
+  playbook-artifact:
+    enable: False
