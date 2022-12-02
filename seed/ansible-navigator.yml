@@ -1,0 +1,24 @@
+# # cspell:ignore cmdline, workdir
+---
+ansible-navigator:
+  ansible:
+    cmdline: -e @viper.yml -e nolog=False
+    playbook:
+      path: ${REPO}/seed.yml
+    inventory:
+      entries:
+      - ${REPO}/viper_inventory.yml 
+  app: run
+  execution-environment:
+    container-engine: podman
+    environment-variables:
+      pass:
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+    image: quay.io/hfenner/ee_terraform:latest
+  logging:
+    level: critical
+    file: /dev/null
+  mode: stdout
+  playbook-artifact:
+    enable: False

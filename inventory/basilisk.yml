@@ -21,6 +21,9 @@ all:
       oauth_client_id: "{{ secrets.oauth_client_id }}"
       oauth_client_secret: "{{ secrets.oauth_client_secret }}"
       keycloak_client_secret: "{{ secrets.keycloak_client_secret }}"
+      dns_secret: "{{ secrets.dns_secret }}"
+      dns_access_key: "{{ secrets.dns_access_key }}"
+      dns_zone_id: 'Z00449703LBWBHFDRID1V'
       install_config: "{{ lookup('template', inventory_dir + '/../roles/acm_managed_cluster_create/templates/install-config.yaml.j2') }}"
       install_config_base64: "{{ install_config | b64encode }}"
       acm_hub_service_account: "{{ secrets.acm_hub_service_account }}" 

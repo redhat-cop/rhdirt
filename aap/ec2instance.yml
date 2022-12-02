@@ -1,0 +1,70 @@
+---
+- hosts: localhost
+  connection: local
+
+  tasks:
+  - name: Create Key for EC2
+    amazon.aws.ec2_key:
+      region: "{{ aws_region }}"
+      name: "{{ env }}_key"
+      key_material: "{{ key_material }}"
+      state: "{{ state }}"
+
+  - name: example using security group rule descriptions
+    amazon.aws.ec2_security_group:
+      name: "{{ item.name }}"
+      state: "{{ state }}"
+      description: "{{ item.description }}"
+      region: "{{ aws_region }}"
+      rules: "{{ item.rules }}"
+    loop: "{{ security_groups }}"
+    when: state == "present"
+
+  - name: Create/Destroy instance with EBS volume
+    amazon.aws.ec2_instance:
+      name: "{{ item.name }}"
+      state: "{{ instance_state }}"
+      image:
+        id: "{{ item.image_id }}"
+      vpc_subnet_id:  "{{ item.vpc_subnet_id }}"
+      instance_type: "{{ item.instance_type }}"
+      key_name: "{{ env }}_key"
+      user_data: "{{ item.user_data | default(omit) }}" 
+      security_group: "{{ item.security_group }}"
+      region: "{{ aws_region }}"
+      tags:
+        Environment: "{{ env }}"
+      volumes:
+        - device_name: /dev/sda1
+          ebs:
+            volume_size: "{{ item.volume_size }}"
+            delete_on_termination: true 
+    register: comp
+    vars:
+      instance_state: "{{ (state=='present') | ternary('running', 'absent') }}"
+    loop: "{{ instances }}"
+
+  - name: example using security group rule descriptions
+    amazon.aws.ec2_security_group:
+      name: "{{ item.name }}"
+      state: "{{ state }}"
+      description: "{{ item.description }}"
+      region: "{{ aws_region }}"
+      rules: "{{ item.rules }}"
+    loop: "{{ security_groups }}"
+    when: state == "absent"
+
+  - name: Add/Remove DNS Record 
+    amazon.aws.route53:
+      state: "{{ state }}"
+      zone: "{{ zone }}"
+      record: "{{ item.name }}.{{ zone }}"
+      type: A
+      ttl: 7200
+      value: "{{ extract_public_ip | ternary(extract_public_ip,omit) }}" 
+      wait: true
+    vars:
+      extract_public_ip: "{{ comp.results | json_query(query) | flatten | join  }}"
+      query: "[].instances[?tags.Name=='{{ item.name }}'].public_ip_address"
+      existing_ip: "{{ lookup('dig', item.name + '.' + zone) }}"
+    loop: "{{ instances }}"

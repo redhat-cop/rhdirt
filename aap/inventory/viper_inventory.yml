@@ -1,0 +1,54 @@
+all:
+  vars:
+    state: present
+    env: viper
+    aws_region: us-east-2
+    zone: dragonslair.dev
+    key_material: "{{ lookup('aws_ssm', '/' + env + '/ssh_public_key', region=aws_region) }}"
+    win_initial_password: "{{ lookup('aws_ssm', '/' + env + '/win_initial_password', region=aws_region) }}"
+    security_groups:
+    - name: rhel
+      description: Red Hat Firewall Ports
+      rules:
+      - proto: tcp
+        ports:
+        - 22
+        cidr_ip: 0.0.0.0/0
+        rule_desc: Allow all SSH
+    - name: windows 
+      description: Windows Firewall Ports
+      rules:
+      - proto: tcp
+        ports:
+        - 3389
+        - 5986
+        cidr_ip: 0.0.0.0/0
+        rule_desc: Allow all WinRM secure
+    instances:
+    - name: subversion
+      instance_type: t2.micro
+      image_id: ami-092b43193629811af
+      vpc_subnet_id: subnet-56fd641a
+      security_group: rhel
+      volume_size: 100
+    - name: windows
+      instance_type: t2.micro
+      image_id: ami-0aea78c3dfdcbb8cd
+      vpc_subnet_id: subnet-56fd641a
+      user_data: "{{ lookup('template', 'win_userdata.j2') }}"
+      security_group: windows
+      volume_size: 100
+  hosts:
+    localhost:
+      ansible_connection: local
+      ansible_python_interpreter: /usr/bin/python3
+  children:
+    platform_Red_Hat_Enterprise_Linux:
+      vars:
+        ansible_user: ec2-user
+    platform_Windows:
+      vars:
+        ansible_connection: winrm
+        ansible_winrm_server_cert_validation: ignore
+        ansible_user: administrator
+        ansible_password: "{{ win_initial_password }}"

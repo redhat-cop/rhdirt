@@ -1,0 +1,29 @@
+all:
+  hosts:
+    localhost:
+      ansible_connection: local
+      ansible_python_interpreter: /usr/bin/python3
+      managed_cluster_name: hydra
+      hackathon_participants_path: hackathon-participants.yaml
+      aap_host: https://example-ansible-automation-platform.apps.fire.dragonslair.dev
+      domain_name: dragonslair.dev
+      aws_region: us-east-1
+      base_install_image: img4.11.12-x86-64-appsub
+      ansible_tower_template_name: rhsso-github-setup
+      acm_hub_server: https://api.fire.dragonslair.dev:6443
+      aws_access_key_id: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
+      aws_secret_access_key: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
+      secrets: "{{ lookup('aws_ssm','/' + managed_cluster_name,region='us-east-2',aws_access_key=aws_access_key_id,aws_secret_key=aws_secret_access_key,shortnames=true, bypath=true, recursive=true) }}"
+      pull_secret: "{{ secrets.pull_secret }}"
+      ssh_private_key: "{{ secrets.ssh_private_key }}" 
+      ssh_public_key: "{{ secrets.ssh_public_key }}" 
+      curator_token: "{{ secrets.curator_token }}" 
+      oauth_client_id: "{{ secrets.oauth_client_id }}"
+      oauth_client_secret: "{{ secrets.oauth_client_secret }}"
+      keycloak_client_secret: "{{ secrets.keycloak_client_secret }}"
+      dns_secret: "{{ secrets.dns_secret }}"
+      dns_access_key: "{{ secrets.dns_access_key }}"
+      dns_zone_id: 'Z00449703LBWBHFDRID1V'
+      install_config: "{{ lookup('template', inventory_dir + '/../roles/acm_managed_cluster_create/templates/install-config.yaml.j2') }}"
+      install_config_base64: "{{ install_config | b64encode }}"
+      acm_hub_service_account: "{{ secrets.acm_hub_service_account }}" 
