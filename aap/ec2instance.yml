@@ -18,6 +18,7 @@
       region: "{{ aws_region }}"
       rules: "{{ item.rules }}"
     loop: "{{ security_groups }}"
+    when: state == "present"
 
   - name: Create/Destroy instance with EBS volume
     amazon.aws.ec2_instance:
@@ -28,6 +29,7 @@
       vpc_subnet_id:  "{{ item.vpc_subnet_id }}"
       instance_type: "{{ item.instance_type }}"
       key_name: "{{ env }}_key"
+      user_data: "{{ item.user_data | default(omit) }}" 
       security_group: "{{ item.security_group }}"
       region: "{{ aws_region }}"
       tags:
@@ -41,6 +43,16 @@
     vars:
       instance_state: "{{ (state=='present') | ternary('running', 'absent') }}"
     loop: "{{ instances }}"
+
+  - name: example using security group rule descriptions
+    amazon.aws.ec2_security_group:
+      name: "{{ item.name }}"
+      state: "{{ state }}"
+      description: "{{ item.description }}"
+      region: "{{ aws_region }}"
+      rules: "{{ item.rules }}"
+    loop: "{{ security_groups }}"
+    when: state == "absent"
 
   - name: Add/Remove DNS Record 
     amazon.aws.route53:
