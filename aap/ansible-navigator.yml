@@ -5,10 +5,10 @@
 ansible-navigator:
   ansible:
     playbook:
-      path: ${REPO}/aap/ec2instance.yml
+      path: ${LOGIC_REPO}/aap/ec2instance.yml
     inventory:
       entries:
-      - ${REPO}/aap/inventory/
+      - ${LOGIC_REPO}/aap/inventory/
   app: run
   execution-environment:
     container-engine: podman
