@@ -2,3 +2,4 @@ ansible-navigator.log
 viper-vault
 viper.yml
 */context/*
+execution_environment/ansible.cfg
