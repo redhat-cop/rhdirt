@@ -1,0 +1,10 @@
+---
+- hosts: tag_Environment_viper:&platform_Windows
+
+  tasks:
+  - name: Create new domain in a new forest on the target host
+    ansible.windows.win_domain:
+      dns_domain_name: "{{ win_domain }}"
+      safe_mode_password: "{{ win_initial_password }}"
+  - name: Reboot the machine with all defaults
+    ansible.windows.win_reboot:
