@@ -24,6 +24,12 @@ all:
         - 5986
         cidr_ip: 0.0.0.0/0
         rule_desc: Allow all WinRM secure
+    aap_repository: ansible-automation-platform-2.2-for-rhel-8-x86_64-rpms
+    aap_bundle: ansible-automation-platform-setup-2.2.0-8.tar.gz 
+    bucket: "{{ env }}-artifacts"
+    pool_id: "{{ lookup('aws_ssm', '/' + env + '/pool_id', region=aws_region) }}"
+    rhsm_username: "{{ lookup('aws_ssm', '/' + env + '/rhsm_username', region=aws_region) }}"
+    rhsm_password: "{{ lookup('aws_ssm', '/' + env + '/rhsm_password', region=aws_region) }}"
     instances:
     - name: subversion
       instance_type: t2.micro
