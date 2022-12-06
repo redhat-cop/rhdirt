@@ -1,7 +1,6 @@
 ---
 - hosts: localhost
   connection: local
-
   tasks:
   - name: Create Key for EC2
     amazon.aws.ec2_key:
@@ -10,7 +9,7 @@
       key_material: "{{ key_material }}"
       state: "{{ state }}"
 
-  - name: example using security group rule descriptions
+  - name: Add Security Groups and Rules
     amazon.aws.ec2_security_group:
       name: "{{ item.name }}"
       state: "{{ state }}"
@@ -18,6 +17,7 @@
       region: "{{ aws_region }}"
       rules: "{{ item.rules }}"
     loop: "{{ security_groups }}"
+    register: provisioned_sec_group
     when: state == "present"
 
   - name: Create/Destroy instance with EBS volume
@@ -68,3 +68,17 @@
       query: "[].instances[?tags.Name=='{{ item.name }}'].public_ip_address"
       existing_ip: "{{ lookup('dig', item.name + '.' + zone) }}"
     loop: "{{ instances }}"
+
+  - name: create minimal aurora instance in default VPC and default subnet group
+    amazon.aws.rds_instance:
+      region: "{{ aws_region }}"
+      engine: postgres
+      db_instance_identifier: "{{ item.db_instance_identifier }}"
+      instance_type: "{{ item.instance_type }}"
+      password: "{{ item.password }}"
+      username: "{{ item.username }}"
+      allocated_storage: "{{ item.allocated_storage }}"
+      vpc_security_group_ids: "{{ sec_group_id }}"
+    vars:
+      sec_group_id: "{{ provisioned_sec_group.results | selectattr('group_name', 'equalto', item.vpc_security_group_name) | map(attribute='group_id') }}"
+    loop: "{{ db_instances }}"

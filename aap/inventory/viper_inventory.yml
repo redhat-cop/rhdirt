@@ -24,6 +24,14 @@ all:
         - 5986
         cidr_ip: 0.0.0.0/0
         rule_desc: Allow all WinRM secure
+    - name: postgres
+      description: Postgres Ports
+      rules:
+      - proto: tcp
+        ports:
+        - 5432
+        cidr_ip: 0.0.0.0/0
+        rule_desc: Allow Postgres connections
     aap_repository: ansible-automation-platform-2.2-for-rhel-8-x86_64-rpms
     aap_bundle: ansible-automation-platform-setup-2.2.0-8.tar.gz 
     bucket: "{{ env }}-artifacts"
@@ -44,6 +52,14 @@ all:
       user_data: "{{ lookup('template', 'win_userdata.j2') }}"
       security_group: windows
       volume_size: 100
+    db_instances:
+    - db_instance_identifier: aapdb
+      instance_type: db.t4g.small
+      username: "{{ lookup('aws_ssm', '/' + env + '/db_username', region=aws_region) }}"
+      password: "{{ lookup('aws_ssm', '/' + env + '/db_password', region=aws_region) }}"
+      vpc_subnet_id: subnet-56fd641a
+      vpc_security_group_name: postgres
+      allocated_storage: 100
   hosts:
     localhost:
       ansible_connection: local
