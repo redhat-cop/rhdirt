@@ -8,9 +8,6 @@
         group-name: "{{ security_groups | map(attribute='name') }}"
     register: provisioned_security_groups
 
-  - debug: 
-      msg: "{{ provisioned_security_groups }}"
-
   - name: Create/Destroy instance with EBS volume
     amazon.aws.ec2_instance:
       name: "{{ item.name }}"
@@ -46,7 +43,7 @@
       allocated_storage: "{{ item.allocated_storage }}"
       vpc_security_group_ids: "{{ sec_group_id }}"
     vars:
-      sec_group_id: "{{ provisioned_sec_group.security_groups | selectattr('group_name', 'equalto', item.vpc_security_group_name) | map(attribute='group_id') }}"
+      sec_group_id: "{{ provisioned_security_groups.security_groups | selectattr('group_name', 'equalto', item.vpc_security_group_name) | map(attribute='group_id') }}"
     loop: "{{ db_instances }}"
 
   - name: Add/Remove DNS Record 
