@@ -2,13 +2,6 @@
 - hosts: localhost
   connection: local
   tasks:
-  - name: Create Key for EC2
-    amazon.aws.ec2_key:
-      region: "{{ aws_region }}"
-      name: "{{ env }}_key"
-      key_material: "{{ key_material }}"
-      state: "{{ state }}"
-
   - name: Add Security Groups and Rules
     amazon.aws.ec2_security_group:
       name: "{{ item.name }}"

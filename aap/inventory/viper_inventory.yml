@@ -4,7 +4,7 @@ all:
     env: viper
     aws_region: us-east-2
     zone: dragonslair.dev
-    key_material: "{{ lookup('aws_ssm', '/' + env + '/ssh_public_key', region=aws_region) }}"
+    key_material: "{{ lookup('aws_ssm', '/' + env + '/machine_ssh_public_key', region=aws_region) }}"
     win_domain: "ad.{{ zone }}"
     win_initial_password: "{{ lookup('aws_ssm', '/' + env + '/win_initial_password', region=aws_region) }}"
     security_groups:
