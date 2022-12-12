@@ -5,10 +5,10 @@
 ansible-navigator:
   ansible:
     playbook:
-      path: ${REPO}/aap/ec2instance.yml
+      path: ${LOGIC_REPO}/aap/ec2instance.yml
     inventory:
       entries:
-      - ${REPO}/aap/inventory/
+      - ${LOGIC_REPO}/aap/inventory/
   app: run
   execution-environment:
     container-engine: podman
@@ -16,7 +16,7 @@ ansible-navigator:
       pass:
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
-    image: quay.io/hfenner/ee_terraform:latest
+    image: quay.io/hfenner/dirt:latest
   logging:
     level: critical
     file: /dev/null

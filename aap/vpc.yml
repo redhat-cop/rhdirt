@@ -1,0 +1,12 @@
+---
+- hosts: localhost
+  connection: local
+  tasks:
+  - name: Add Security Groups and Rules
+    amazon.aws.ec2_security_group:
+      name: "{{ item.name }}"
+      state: "{{ state }}"
+      description: "{{ item.description }}"
+      region: "{{ aws_region }}"
+      rules: "{{ item.rules }}"
+    loop: "{{ security_groups }}"

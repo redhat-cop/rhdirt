@@ -1,0 +1,46 @@
+---
+- hosts: tag_Environment_viper:&platform_Red_Hat_Enterprise_Linux
+
+  tasks:
+  - name: Register Red Hat
+    community.general.redhat_subscription:
+      state: present
+      username: "{{ rhsm_username }}"
+      password: "{{ rhsm_password }}"
+      pool_ids:
+      - "{{ pool_id }}"
+    become: yes
+
+  - name: Enable subscription-manager repository control
+    command: subscription-manager config --rhsm.manage_repos=1
+    become: yes
+
+  - name: Enable Ansible Automation Platform Repository
+    community.general.rhsm_repository:
+      name: "{{ aap_repository }}" 
+    become: yes
+
+  - name: Update system
+    ansible.builtin.yum:
+      name: '*'
+      state: latest
+    become: yes
+    register: sysreboot
+
+  - name: Reboot
+    ansible.builtin.reboot:
+    become: yes
+    when: sysreboot.changed
+
+  - name: Download AAP Bundle from S3
+    amazon.aws.s3_object:
+      bucket: "{{ bucket }}"
+      object: "{{ aap_bundle }}"
+      dest: "/tmp/{{ aap_bundle }}"
+      mode: get
+    delegate_to: localhost
+
+  - name: Copy bundle installer to system
+    ansible.builtin.copy:
+      src: "/tmp/{{ aap_bundle }}" 
+      dest: "/tmp/{{ aap_bundle }}"
