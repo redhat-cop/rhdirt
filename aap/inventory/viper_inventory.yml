@@ -40,14 +40,27 @@ all:
     rhsm_username: "{{ lookup('aws_ssm', '/' + env + '/rhsm_username', region=aws_region) }}"
     rhsm_password: "{{ lookup('aws_ssm', '/' + env + '/rhsm_password', region=aws_region) }}"
     instances:
-    - name: subversion
-      instance_type: t2.micro
+    - name: aac
+      instance_type: m5.xlarge
       image_id: ami-092b43193629811af
       vpc_subnet_id: subnet-56fd641a
       security_group: rhel
       volume_size: 100
-    - name: windows
-      instance_type: t2.micro
+    - name: aah
+      instance_type: m5.xlarge
+      image_id: ami-092b43193629811af
+      vpc_subnet_id: subnet-56fd641a
+      security_group: rhel
+      volume_size: 100
+    - name: dc01
+      instance_type: m5.xlarge
+      image_id: ami-0aea78c3dfdcbb8cd
+      vpc_subnet_id: subnet-56fd641a
+      user_data: "{{ lookup('template', 'win_userdata.j2') }}"
+      security_group: windows
+      volume_size: 100
+    - name: tomcat
+      instance_type: m5.xlarge
       image_id: ami-0aea78c3dfdcbb8cd
       vpc_subnet_id: subnet-56fd641a
       user_data: "{{ lookup('template', 'win_userdata.j2') }}"
