@@ -68,7 +68,7 @@ all:
       volume_size: 100
     db_instances:
     - db_instance_identifier: aapdb
-      instance_type: db.t4g.small
+      instance_type: db.t4g.xlarge
       username: "{{ lookup('aws_ssm', '/' + env + '/db_username', region=aws_region) }}"
       password: "{{ lookup('aws_ssm', '/' + env + '/db_password', region=aws_region) }}"
       vpc_subnet_id: subnet-56fd641a
