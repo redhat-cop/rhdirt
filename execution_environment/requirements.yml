@@ -11,3 +11,4 @@ collections:
   - community.aws
   - ansible.windows
   - ansible.controller
+  - community.postgresql
