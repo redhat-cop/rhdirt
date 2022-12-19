@@ -14,6 +14,8 @@ all:
       - proto: tcp
         ports:
         - 22
+        - 80
+        - 443
         cidr_ip: 0.0.0.0/0
         rule_desc: Allow all SSH
     - name: windows 
@@ -35,10 +37,14 @@ all:
         rule_desc: Allow Postgres connections
     aap_repository: ansible-automation-platform-2.2-for-rhel-8-x86_64-rpms
     aap_bundle: ansible-automation-platform-setup-2.2.0-8.tar.gz 
+    aap_admin_password: "{{ lookup('aws_ssm', '/' + env + '/aap_admin_password', region=aws_region) }}"
+    aap_postgres_url: "{{ db_instances[0].db_instance_identifier }}.{{ zone }}"
     bucket: "{{ env }}-artifacts"
     pool_id: "{{ lookup('aws_ssm', '/' + env + '/pool_id', region=aws_region) }}"
     rhsm_username: "{{ lookup('aws_ssm', '/' + env + '/rhsm_username', region=aws_region) }}"
     rhsm_password: "{{ lookup('aws_ssm', '/' + env + '/rhsm_password', region=aws_region) }}"
+    rh_registry_username: "{{ lookup('aws_ssm', '/' + env + '/rh_registry_username', region=aws_region) }}"
+    rh_registry_password: "{{ lookup('aws_ssm', '/' + env + '/rh_registry_password', region=aws_region) }}"
     instances:
     - name: aac
       instance_type: m5.xlarge

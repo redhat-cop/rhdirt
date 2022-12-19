@@ -14,6 +14,10 @@ export CONTROLLER_HOST=$(op item get djqax5szekil4unby5fownb4qa --fields control
 export GITHUB_OAUTH_TOKEN=$(op item get cuxcpxsvbj7hkab62dgngjqvnu --fields password)
 export DB_USERNAME=$(op item get qwhf7kkui42bo62k2ckocoatyu --fields username)
 export DB_PASSWORD=$(op item get qwhf7kkui42bo62k2ckocoatyu --fields password)
+export RH_REGISTRY_USERNAME=$(op item get op7albvuwg6vuzhuwreohhxbyu --fields username)
+export RH_REGISTRY_PASSWORD=$(op item get op7albvuwg6vuzhuwreohhxbyu --fields password)
+export RH_REGISTRY_URL=$(op item get op7albvuwg6vuzhuwreohhxbyu --fields registry_url)
+export  
 #If you don't have an ssh-agent running
 #eval $(ssh-agent)
 aws ssm get-parameter --name "/${NS}/machine_ssh_private_key" --with-decryption --output text --query Parameter.Value | ssh-add -
