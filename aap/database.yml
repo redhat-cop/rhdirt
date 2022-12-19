@@ -1,0 +1,18 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+  - name: Create new databases for Controller and Hub
+    community.postgresql.postgresql_db:
+      name: "{{ item }}"
+      state: "{{ state }}" 
+      login_user: "{{ db_instances[0].username }}"
+      login_password: "{{ db_instances[0].password }}"
+      login_host: "{{ db_instances[0].db_instance_identifier}}.{{ zone }}" 
+    loop:
+    - anscon 
+    - anshub
+
+
