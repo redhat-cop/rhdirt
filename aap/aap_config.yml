@@ -1,0 +1,85 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: False
+
+
+  tasks:
+  - name: Create a valid SCM credential from a private_key file
+    ansible.controller.credential:
+      name: "{{ env }}_logic_deploy_key"
+      controller_host: "{{ controller_host }}" 
+      controller_oauthtoken: "{{ controller_oauthtoken }}"
+      organization: Default
+      state: "{{ state }}"
+      credential_type: Source Control
+      inputs:
+        ssh_key_data: "{{ logic_deploy_key }}"
+
+  - name: Add project
+    ansible.controller.project:
+      name: "{{ env }}_rhdirt"
+      controller_host: "{{ controller_host }}" 
+      controller_oauthtoken: "{{ controller_oauthtoken }}"
+      description: "{{ env | capitalize }} logic project"
+      organization: Default
+      state: "{{ state }}"
+      scm_type: git
+      scm_url: "{{ scm_url }}" 
+      credential: "{{ env }}_logic_deploy_key"
+
+  - name: Create inventory
+    ansible.controller.inventory:
+      name: "{{ env }} Inventory"
+      controller_host: "{{ controller_host }}" 
+      controller_oauthtoken: "{{ controller_oauthtoken }}"
+      description: "{{ env }} Inventory"
+      organization: Default
+      state: "{{ state }}"
+
+  - name: Add inventory source
+    ansible.controller.inventory_source:
+      name: "{{ env }} Inventory Source"
+      description: "{{ env }} Inventory Source"
+      inventory: "{{ env }} Inventory"
+      controller_host: "{{ controller_host }}" 
+      controller_oauthtoken: "{{ controller_oauthtoken }}"
+      overwrite: True
+      organization: Default
+      source: scm
+      source_project: "{{ env }}_rhdirt"
+      source_path: aap/inventory
+
+  - name: Update a single inventory source
+    ansible.controller.inventory_source_update:
+      controller_host: "{{ controller_host }}" 
+      controller_oauthtoken: "{{ controller_oauthtoken }}"
+      name: "{{ env }} Inventory Source"
+      inventory: "{{ env }} Inventory"
+      organization: Default
+
+  - name: Add credential for AWS 
+    ansible.controller.credential:
+      name: "{{ env }}_aws_key"
+      controller_host: "{{ controller_host }}" 
+      controller_oauthtoken: "{{ controller_oauthtoken }}"
+      organization: Default
+      state: "{{ state }}"
+      credential_type: Amazon Web Services
+      inputs:
+        username: "{{ aws_access_key }}"
+        password: "{{ aws_secret_key }}" 
+
+  - name: Create EC2 Job Template
+    ansible.controller.job_template:
+      name: "{{ env }} ec2_rds"
+      controller_host: "{{ controller_host }}" 
+      controller_oauthtoken: "{{ controller_oauthtoken }}"
+      job_type: "run"
+      organization: Default
+      inventory: "{{ env }} Inventory"
+      project: "{{ env }}_rhdirt"
+      playbook: "aap/ec2_rds.yml"
+      credentials:
+        - "{{ env }}_aws_key"
+      state: "{{ state }}"

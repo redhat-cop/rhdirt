@@ -4,7 +4,8 @@ all:
     env: viper
     aws_region: us-east-2
     zone: dragonslair.dev
-    key_material: "{{ lookup('aws_ssm', '/' + env + '/machine_ssh_public_key', region=aws_region) }}"
+    key_material: "{{ lookup('amazon.aws.aws_ssm', '/' + env + '/machine_ssh_public_key', region=aws_region) }}"
+    logic_deploy_key: "{{ lookup('aws_ssm', '/' + env + '/logic_deploy_private_key', region=aws_region) }}"
     win_domain: "ad.{{ zone }}"
     win_initial_password: "{{ lookup('aws_ssm', '/' + env + '/win_initial_password', region=aws_region) }}"
     security_groups:
@@ -45,6 +46,11 @@ all:
     rhsm_password: "{{ lookup('aws_ssm', '/' + env + '/rhsm_password', region=aws_region) }}"
     rh_registry_username: "{{ lookup('aws_ssm', '/' + env + '/rh_registry_username', region=aws_region) }}"
     rh_registry_password: "{{ lookup('aws_ssm', '/' + env + '/rh_registry_password', region=aws_region) }}"
+    controller_host: https://example-ansible-automation-platform.apps.fire.dragonslair.dev 
+    controller_oauthtoken: "{{ lookup('aws_ssm', '/' + env + '/controller_oauth_token', region=aws_region) }}"
+    scm_url: git@github.com:hfenner/rhdirt.git
+    aws_access_key: "{{ lookup('aws_ssm', '/' + env + '/aws_access_key', region=aws_region) }}"
+    aws_secret_key: "{{ lookup('aws_ssm', '/' + env + '/aws_secret_key', region=aws_region) }}"
     instances:
     - name: aac
       instance_type: m5.xlarge

@@ -17,7 +17,6 @@ export DB_PASSWORD=$(op item get qwhf7kkui42bo62k2ckocoatyu --fields password)
 export RH_REGISTRY_USERNAME=$(op item get op7albvuwg6vuzhuwreohhxbyu --fields username)
 export RH_REGISTRY_PASSWORD=$(op item get op7albvuwg6vuzhuwreohhxbyu --fields password)
 export RH_REGISTRY_URL=$(op item get op7albvuwg6vuzhuwreohhxbyu --fields registry_url)
-export  
 #If you don't have an ssh-agent running
 #eval $(ssh-agent)
 aws ssm get-parameter --name "/${NS}/machine_ssh_private_key" --with-decryption --output text --query Parameter.Value | ssh-add -
