@@ -45,12 +45,13 @@
       controller_host: "{{ controller_host }}" 
       controller_oauthtoken: "{{ controller_oauthtoken }}"
       overwrite: True
+      overwrite_vars: True
       organization: Default
       source: scm
       source_project: "{{ env }}_rhdirt"
       source_path: aap/inventory
 
-  - name: Update a single inventory source
+  - name: Update a inventory source to point to project
     ansible.controller.inventory_source_update:
       controller_host: "{{ controller_host }}" 
       controller_oauthtoken: "{{ controller_oauthtoken }}"
@@ -70,11 +71,33 @@
         username: "{{ aws_access_key }}"
         password: "{{ aws_secret_key }}" 
 
+  - name: Add credential for Quay to pull image
+    ansible.controller.credential:
+      name: "{{ env }}_quay_cred"
+      controller_host: "{{ controller_host }}" 
+      controller_oauthtoken: "{{ controller_oauthtoken }}"
+      organization: Default
+      state: "{{ state }}"
+      credential_type: Container Registry
+      inputs:
+        host: quay.io
+        username: "{{ quay_username }}"
+        password: "{{ quay_password }}" 
+
+  - name: Add EE to the controller instance
+    ansible.controller.execution_environment:
+      controller_host: "{{ controller_host }}" 
+      controller_oauthtoken: "{{ controller_oauthtoken }}"
+      credential: "{{ env }}_quay_cred" 
+      name: "{{ env }}_execution_environment"
+      image: quay.io/hfenner/dirt:latest
+
   - name: Create EC2 Job Template
     ansible.controller.job_template:
       name: "{{ env }} ec2_rds"
       controller_host: "{{ controller_host }}" 
       controller_oauthtoken: "{{ controller_oauthtoken }}"
+      execution_environment: "{{ env }}_execution_environment"
       job_type: "run"
       organization: Default
       inventory: "{{ env }} Inventory"
