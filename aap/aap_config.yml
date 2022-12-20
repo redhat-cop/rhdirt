@@ -5,104 +5,142 @@
 
 
   tasks:
-  - name: Create a valid SCM credential from a private_key file
-    ansible.controller.credential:
-      name: "{{ env }}_logic_deploy_key"
-      controller_host: "{{ controller_host }}" 
-      controller_oauthtoken: "{{ controller_oauthtoken }}"
-      organization: Default
-      state: "{{ state }}"
-      credential_type: Source Control
-      inputs:
-        ssh_key_data: "{{ logic_deploy_key }}"
+  - name: "Configure creds, project, inventory, and job templates for {{ env }}"
+    block: 
+    - name: Create a valid SCM credential from a private_key file
+      ansible.controller.credential:
+        name: "{{ env }}_logic_deploy_key"
+        controller_host: "{{ controller_host }}" 
+        controller_oauthtoken: "{{ controller_oauthtoken }}"
+        organization: Default
+        state: "{{ state }}"
+        credential_type: Source Control
+        inputs:
+          ssh_key_data: "{{ logic_deploy_key }}"
 
-  - name: Add project
-    ansible.controller.project:
-      name: "{{ env }}_rhdirt"
-      controller_host: "{{ controller_host }}" 
-      controller_oauthtoken: "{{ controller_oauthtoken }}"
-      description: "{{ env | capitalize }} logic project"
-      organization: Default
-      state: "{{ state }}"
-      scm_type: git
-      scm_url: "{{ scm_url }}" 
-      credential: "{{ env }}_logic_deploy_key"
-
-  - name: Create inventory
-    ansible.controller.inventory:
-      name: "{{ env }} Inventory"
-      controller_host: "{{ controller_host }}" 
-      controller_oauthtoken: "{{ controller_oauthtoken }}"
-      description: "{{ env }} Inventory"
-      organization: Default
-      state: "{{ state }}"
-
-  - name: Add inventory source
-    ansible.controller.inventory_source:
-      name: "{{ env }} Inventory Source"
-      description: "{{ env }} Inventory Source"
-      inventory: "{{ env }} Inventory"
-      controller_host: "{{ controller_host }}" 
-      controller_oauthtoken: "{{ controller_oauthtoken }}"
-      overwrite: True
-      overwrite_vars: True
-      organization: Default
-      source: scm
-      source_project: "{{ env }}_rhdirt"
-      source_path: aap/inventory
-
-  - name: Update a inventory source to point to project
-    ansible.controller.inventory_source_update:
-      controller_host: "{{ controller_host }}" 
-      controller_oauthtoken: "{{ controller_oauthtoken }}"
-      name: "{{ env }} Inventory Source"
-      inventory: "{{ env }} Inventory"
-      organization: Default
-
-  - name: Add credential for AWS 
-    ansible.controller.credential:
-      name: "{{ env }}_aws_key"
-      controller_host: "{{ controller_host }}" 
-      controller_oauthtoken: "{{ controller_oauthtoken }}"
-      organization: Default
-      state: "{{ state }}"
-      credential_type: Amazon Web Services
-      inputs:
-        username: "{{ aws_access_key }}"
-        password: "{{ aws_secret_key }}" 
-
-  - name: Add credential for Quay to pull image
-    ansible.controller.credential:
-      name: "{{ env }}_quay_cred"
-      controller_host: "{{ controller_host }}" 
-      controller_oauthtoken: "{{ controller_oauthtoken }}"
-      organization: Default
-      state: "{{ state }}"
-      credential_type: Container Registry
-      inputs:
-        host: quay.io
-        username: "{{ quay_username }}"
-        password: "{{ quay_password }}" 
-
-  - name: Add EE to the controller instance
-    ansible.controller.execution_environment:
-      controller_host: "{{ controller_host }}" 
-      controller_oauthtoken: "{{ controller_oauthtoken }}"
-      credential: "{{ env }}_quay_cred" 
-      name: "{{ env }}_execution_environment"
-      image: quay.io/hfenner/dirt:latest
-
-  - name: Create EC2 Job Template
-    ansible.controller.job_template:
-      name: "{{ env }} ec2_rds"
-      controller_host: "{{ controller_host }}" 
-      controller_oauthtoken: "{{ controller_oauthtoken }}"
-      execution_environment: "{{ env }}_execution_environment"
-      job_type: "run"
-      organization: Default
-      inventory: "{{ env }} Inventory"
-      project: "{{ env }}_rhdirt"
-      playbook: "aap/ec2_rds.yml"
-      credentials:
-        - "{{ env }}_aws_key"
-      state: "{{ state }}"
+    - name: Add credential for AWS 
+      ansible.controller.credential:
+        name: "{{ env }}_aws_key"
+        controller_host: "{{ controller_host }}" 
+        controller_oauthtoken: "{{ controller_oauthtoken }}"
+        organization: Default
+        state: "{{ state }}"
+        credential_type: Amazon Web Services
+        inputs:
+          username: "{{ aws_access_key }}"
+          password: "{{ aws_secret_key }}" 
+  
+    - name: Add project
+      ansible.controller.project:
+        name: "{{ env }}_rhdirt"
+        controller_host: "{{ controller_host }}" 
+        controller_oauthtoken: "{{ controller_oauthtoken }}"
+        description: "{{ env | capitalize }} logic project"
+        organization: Default
+        state: "{{ state }}"
+        scm_type: git
+        scm_url: "{{ scm_url }}" 
+        credential: "{{ env }}_logic_deploy_key"
+  
+    - name: Launch a project with a timeout of 10 seconds
+      ansible.controller.project_update:
+        controller_host: "{{ controller_host }}" 
+        controller_oauthtoken: "{{ controller_oauthtoken }}"
+        project: "{{ env }}_rhdirt"
+        timeout: 10
+      when: state != 'absent'
+  
+    - name: Create inventory
+      ansible.controller.inventory:
+        name: "{{ env }} Inventory"
+        controller_host: "{{ controller_host }}" 
+        controller_oauthtoken: "{{ controller_oauthtoken }}"
+        description: "{{ env }} Inventory"
+        organization: Default
+        state: "{{ state }}"
+  
+    - name: Add inventory source
+      ansible.controller.inventory_source:
+        name: "{{ env }} Inventory Source"
+        description: "{{ env }} Inventory Source"
+        inventory: "{{ env }} Inventory"
+        credential: "{{ env }}_aws_key"
+        controller_host: "{{ controller_host }}" 
+        controller_oauthtoken: "{{ controller_oauthtoken }}"
+        overwrite: True
+        overwrite_vars: True
+        organization: Default
+        source: scm
+        source_project: "{{ env }}_rhdirt"
+        source_path: aap/inventory
+      when: state != 'absent'
+  
+    - name: Update a inventory source to point to project
+      ansible.controller.inventory_source_update:
+        controller_host: "{{ controller_host }}" 
+        controller_oauthtoken: "{{ controller_oauthtoken }}"
+        name: "{{ env }} Inventory Source"
+        inventory: "{{ env }} Inventory"
+        organization: Default
+      when: state != 'absent'
+  
+    - name: Add credential for Quay to pull image
+      ansible.controller.credential:
+        name: "{{ env }}_quay_cred"
+        controller_host: "{{ controller_host }}" 
+        controller_oauthtoken: "{{ controller_oauthtoken }}"
+        organization: Default
+        state: "{{ state }}"
+        credential_type: Container Registry
+        inputs:
+          host: quay.io
+          username: "{{ quay_username }}"
+          password: "{{ quay_password }}" 
+  
+    - name: Add EE to the controller instance
+      ansible.controller.execution_environment:
+        controller_host: "{{ controller_host }}" 
+        controller_oauthtoken: "{{ controller_oauthtoken }}"
+        credential: "{{ env }}_quay_cred" 
+        name: "{{ env }}_execution_environment"
+        image: quay.io/hfenner/dirt:latest
+        state: "{{ state }}"
+  
+    - name: Create EC2 Job Template
+      ansible.controller.job_template:
+        name: "{{ env }}_ec2_rds"
+        controller_host: "{{ controller_host }}" 
+        controller_oauthtoken: "{{ controller_oauthtoken }}"
+        execution_environment: "{{ env }}_execution_environment"
+        job_type: "run"
+        organization: Default
+        inventory: "{{ env }} Inventory"
+        project: "{{ env }}_rhdirt"
+        playbook: "aap/ec2_rds.yml"
+        credentials:
+          - "{{ env }}_aws_key"
+        state: "{{ state }}"
+      when: state != 'absent'
+      loop:
+      - vpc
+      - ec2_rds
+      - database
+      - inventory
+  
+    #This is really only necessary because the Job Template can't handle a non-existent execution environment
+    - name: Delete EC2 Job Template
+      ansible.controller.job_template:
+        name: "{{ env }}_ec2_rds"
+        controller_host: "{{ controller_host }}" 
+        controller_oauthtoken: "{{ controller_oauthtoken }}"
+        state: "{{ state }}"
+      when: state == 'absent'
+  
+    - name: Launch job
+      ansible.controller.job_launch:
+        controller_host: "{{ controller_host }}" 
+        controller_oauthtoken: "{{ controller_oauthtoken }}"
+        job_template: "{{ job_template }}" 
+      when: state != 'absent'
+    vars:
+      job_template: "{{ env }}_ec2_rds"
