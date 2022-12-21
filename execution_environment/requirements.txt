@@ -10,3 +10,4 @@ kubernetes
 ansible-runner >=2.2.1
 pywinrm
 psycopg2-binary
+ansible-lint

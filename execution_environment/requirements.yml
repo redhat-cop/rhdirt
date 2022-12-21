@@ -12,4 +12,3 @@ collections:
   - ansible.windows
   - ansible.controller
   - community.postgresql
-  - redhat_cop.aap_utilities
