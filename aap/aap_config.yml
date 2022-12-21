@@ -29,7 +29,19 @@
         inputs:
           username: "{{ aws_access_key }}"
           password: "{{ aws_secret_key }}" 
-  
+
+    - name: Add credential for Machine
+      ansible.controller.credential:
+        name: "{{ env }}_machine_credential"
+        controller_host: "{{ controller_host }}" 
+        controller_oauthtoken: "{{ controller_oauthtoken }}"
+        organization: Default
+        state: "{{ state }}"
+        credential_type: Machine
+        inputs:
+          username: ec2-user
+          ssh_key_data: "{{ machine_key }}" 
+           
     - name: Add project
       ansible.controller.project:
         name: "{{ env }}_rhdirt"
@@ -108,7 +120,7 @@
   
     - name: Create EC2 Job Template
       ansible.controller.job_template:
-        name: "{{ env }}_ec2_rds"
+        name: "{{ item.name }}"
         controller_host: "{{ controller_host }}" 
         controller_oauthtoken: "{{ controller_oauthtoken }}"
         execution_environment: "{{ env }}_execution_environment"
@@ -116,31 +128,46 @@
         organization: Default
         inventory: "{{ env }} Inventory"
         project: "{{ env }}_rhdirt"
-        playbook: "aap/ec2_rds.yml"
-        credentials:
-          - "{{ env }}_aws_key"
+        playbook: "{{ item.playbook }}"
+        credentials: "{{ item.credentials }}"
         state: "{{ state }}"
       when: state != 'absent'
-      loop:
-      - vpc
-      - ec2_rds
-      - database
-      - inventory
+      loop: "{{ job_template }}"
   
     #This is really only necessary because the Job Template can't handle a non-existent execution environment
     - name: Delete EC2 Job Template
       ansible.controller.job_template:
-        name: "{{ env }}_ec2_rds"
+        name: "{{ item.name }}"
         controller_host: "{{ controller_host }}" 
         controller_oauthtoken: "{{ controller_oauthtoken }}"
         state: "{{ state }}"
       when: state == 'absent'
+      loop: "{{ job_template }}"
   
     - name: Launch job
       ansible.controller.job_launch:
         controller_host: "{{ controller_host }}" 
         controller_oauthtoken: "{{ controller_oauthtoken }}"
-        job_template: "{{ job_template }}" 
+        job_template: "{{ item.name }}" 
       when: state != 'absent'
+      loop: "{{ job_template }}"
+
     vars:
-      job_template: "{{ env }}_ec2_rds"
+      job_template:
+      - name: "{{ env }}/vpc"
+        playbook: aap/vpc.yml
+        credentials:
+        - "{{ env }}_aws_key"
+      - name: "{{ env }}_ec2_rds"
+        playbook: aap/ec2_rds.yml
+        credentials:
+        - "{{ env }}_aws_key"
+      - name: "{{ env }}_database"
+        playbook: aap/database.yml
+        credentials:
+        - "{{ env }}_aws_key"
+      - name: "{{ env }}_update"
+        playbook: aap/update.yml
+        credentials:
+        - "{{ env }}_aws_key"
+        - "{{ env }}_machine_credential"

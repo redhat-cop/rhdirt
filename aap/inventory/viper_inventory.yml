@@ -8,9 +8,10 @@ all:
     aws_region: us-east-2
     secrets: "{{ lookup('aws_ssm','/' + env,region=aws_region,aws_access_key=aws_access_key_id,aws_secret_key=aws_secret_access_key,shortnames=true,bypath=true,recursive=true) }}"
     key_material: "{{ secrets.machine_ssh_public_key }}"
-    logic_deploy_key: "{{ lookup('amazon.aws.aws_ssm', '/' + env + '/logic_deploy_private_key', region=aws_region) }}"
+    machine_key: "{{ secrets.machine_ssh_private_key }}"
+    logic_deploy_key: "{{ secrets.logic_deploy_private_key }}"
     win_domain: "ad.{{ zone }}"
-    win_initial_password: "{{ lookup('amazon.aws.aws_ssm', '/' + env + '/win_initial_password', region=aws_region) }}"
+    win_initial_password: "{{ secrets.win_initial_password }}"
     security_groups:
     - name: rhel
       description: Red Hat Firewall Ports
@@ -41,14 +42,14 @@ all:
         rule_desc: Allow Postgres connections
     aap_repository: ansible-automation-platform-2.2-for-rhel-8-x86_64-rpms
     aap_bundle: ansible-automation-platform-setup-2.2.0-8.tar.gz 
-    aap_admin_password: "{{ lookup('amazon.aws.aws_ssm', '/' + env + '/aap_admin_password', region=aws_region) }}"
+    aap_admin_password: "{{ secrets.aap_admin_password }}"
     aap_postgres_url: "{{ db_instances[0].db_instance_identifier }}.{{ zone }}"
     bucket: "{{ env }}-artifacts"
-    pool_id: "{{ lookup('amazon.aws.aws_ssm', '/' + env + '/pool_id', region=aws_region) }}"
+    pool_id: "{{ secrets.pool_id }}"
     rhsm_username: "{{ lookup('amazon.aws.aws_ssm', '/' + env + '/rhsm_username', region=aws_region) }}"
     rhsm_password: "{{ lookup('amazon.aws.aws_ssm', '/' + env + '/rhsm_password', region=aws_region) }}"
     rh_registry_username: "{{ lookup('amazon.aws.aws_ssm', '/' + env + '/rh_registry_username', region=aws_region) }}"
-    rh_registry_password: "{{ lookup('amazon.aws.aws_ssm', '/' + env + '/rh_registry_password', region=aws_region, aws_access_key=) }}"
+    rh_registry_password: "{{ secrets.rh_registry_password }}"
     quay_username: "{{ lookup('amazon.aws.aws_ssm', '/' + env + '/quay_username', region=aws_region) }}"
     quay_password: "{{ lookup('amazon.aws.aws_ssm', '/' + env + '/quay_password', region=aws_region) }}"
     controller_host: https://example-ansible-automation-platform.apps.fire.dragonslair.dev 

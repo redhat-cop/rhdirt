@@ -39,21 +39,26 @@
       dest: "/tmp/{{ aap_bundle }}"
       mode: get
     delegate_to: localhost
+    run_once: true
 
   - name: Extract the AAP bundle
     ansible.builtin.unarchive:
       src: "/tmp/{{ aap_bundle }}"
       dest: "/tmp" 
     delegate_to: localhost
+    run_once: true
 
   - name: Run Ansible setup 
     template: 
       src: inventory.j2
-      dest: "/tmp/{{ aap_bundle }}/inventory"
+      dest: "/tmp/{{ aap_bundle | splitext | first | splitext | first }}/inventory"
     delegate_to: localhost
+    run_once: true
 
   - name: Run the setup command
-    command: /tmp/{{ aap_bundle }}/setup.sh -- -b
+    command: "/tmp/{{ aap_bundle | splitext | first | splitext | first }}/setup.sh -- -b"
+    delegate_to: localhost
+    run_once: true
 
       
 
