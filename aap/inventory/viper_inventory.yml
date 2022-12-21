@@ -64,12 +64,18 @@ all:
       vpc_subnet_id: subnet-56fd641a
       security_group: rhel
       volume_size: 100
+      tags:
+        Environment: "{{ env }}"
+        Role: aac
     - name: aah
       instance_type: m5.xlarge
       image_id: ami-092b43193629811af
       vpc_subnet_id: subnet-56fd641a
       security_group: rhel
       volume_size: 100
+      tags:
+        Environment: "{{ env }}"
+        Role: aah
     - name: dc01
       instance_type: m5.xlarge
       image_id: ami-0aea78c3dfdcbb8cd
@@ -77,6 +83,9 @@ all:
       user_data: "{{ lookup('template', 'win_userdata.j2') }}"
       security_group: windows
       volume_size: 100
+      tags:
+        Environment: "{{ env }}"
+        Role: dc
     - name: tomcat
       instance_type: m5.xlarge
       image_id: ami-0aea78c3dfdcbb8cd
@@ -84,6 +93,9 @@ all:
       user_data: "{{ lookup('template', 'win_userdata.j2') }}"
       security_group: windows
       volume_size: 100
+      tags:
+        Environment: "{{ env }}"
+        Role: tomcat
     db_instances:
     - db_instance_identifier: aapdb
       instance_type: db.t4g.xlarge
