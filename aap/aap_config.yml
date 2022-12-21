@@ -131,7 +131,7 @@
         playbook: "{{ item.playbook }}"
         credentials: "{{ item.credentials }}"
         state: "{{ state }}"
-        extra_vars: "{{ item.extra_vars }}"
+        extra_vars: "{{ item.extra_vars | default(omit) }}"
       when: state != 'absent'
       loop: "{{ job_template }}"
   
@@ -153,7 +153,7 @@
       when: state != 'absent'
       loop: "{{ job_template }}"
       tags: 
-      - launch
+      - never
 
 
     vars:
@@ -182,12 +182,6 @@
         playbook: aap/database.yml
         credentials:
         - "{{ env }}_aws_key"
-      - name: "{{ env }}_database_deprovision"
-        playbook: aap/database.yml
-        credentials:
-        - "{{ env }}_aws_key"
-        extra_vars:
-          state: absent
       - name: "{{ env }}_update"
         playbook: aap/update.yml
         credentials:

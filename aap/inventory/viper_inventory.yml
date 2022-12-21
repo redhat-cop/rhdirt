@@ -46,17 +46,16 @@ all:
     aap_postgres_url: "{{ db_instances[0].db_instance_identifier }}.{{ zone }}"
     bucket: "{{ env }}-artifacts"
     pool_id: "{{ secrets.pool_id }}"
-    rhsm_username: "{{ lookup('amazon.aws.aws_ssm', '/' + env + '/rhsm_username', region=aws_region) }}"
-    rhsm_password: "{{ lookup('amazon.aws.aws_ssm', '/' + env + '/rhsm_password', region=aws_region) }}"
-    rh_registry_username: "{{ lookup('amazon.aws.aws_ssm', '/' + env + '/rh_registry_username', region=aws_region) }}"
+    rhsm_username: "{{ secrets.rhsm_username }}"
+    rhsm_password: "{{ secrets.rhsm_password }}"
+    rh_registry_username: "{{ secrets.rh_registry_username }}"
     rh_registry_password: "{{ secrets.rh_registry_password }}"
-    quay_username: "{{ lookup('amazon.aws.aws_ssm', '/' + env + '/quay_username', region=aws_region) }}"
-    quay_password: "{{ lookup('amazon.aws.aws_ssm', '/' + env + '/quay_password', region=aws_region) }}"
+    quay_username: "{{ secrets.quay_username }}"
+    quay_password: "{{ secrets.quay_password }}"
     controller_host: https://example-ansible-automation-platform.apps.fire.dragonslair.dev 
-    controller_oauthtoken: "{{ lookup('amazon.aws.aws_ssm', '/' + env + '/controller_oauth_token', region=aws_region) }}"
+    controller_oauthtoken: "{{ secrets.controller_oauth_token }}"
+    rh_offline_token: "{{ secrets.rh_offline_token }}"
     scm_url: git@github.com:hfenner/rhdirt.git
-    aws_access_key: "{{ lookup('amazon.aws.aws_ssm', '/' + env + '/aws_access_key', region=aws_region) }}"
-    aws_secret_key: "{{ lookup('amazon.aws.aws_ssm', '/' + env + '/aws_secret_key', region=aws_region) }}"
     instances:
     - name: aac
       instance_type: m5.xlarge
@@ -99,8 +98,8 @@ all:
     db_instances:
     - db_instance_identifier: aapdb
       instance_type: db.t4g.xlarge
-      username: "{{ lookup('amazon.aws.aws_ssm', '/' + env + '/db_username', region=aws_region) }}"
-      password: "{{ lookup('amazon.aws.aws_ssm', '/' + env + '/db_password', region=aws_region) }}"
+      username: "{{ secrets.db_username }}"
+      password: "{{ secrets.db_password }}"
       vpc_subnet_id: subnet-56fd641a
       vpc_security_group_name: postgres
       allocated_storage: 100
@@ -117,4 +116,4 @@ all:
         ansible_connection: winrm
         ansible_winrm_server_cert_validation: ignore
         ansible_user: administrator
-        ansible_password: "{{ win_initial_password }}"
+        ansible_password: "{{ secrets.win_initial_password }}"
