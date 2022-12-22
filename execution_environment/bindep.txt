@@ -1,4 +1,4 @@
-libnsl
-iputils
-unzip
-ansible-core
+libnsl [platform:rpm]
+iputils [platform:rpm]
+unzip [platform:rpm]
+ansible-core [platform:rpm]

@@ -1,0 +1,8 @@
+FROM registry.redhat.io/ansible-automation-platform-23/ansible-builder-rhel8:latest
+USER root
+RUN microdnf --enablerepo=rhocp-4.11-for-rhel-8-x86_64-rpms --nodocs --setopt install_weak_deps=0 install openshift-clients; \
+    microdnf clean all; \
+    rm -rf /var/cache/{dnf,yum}; \
+    rm -rf /var/lib/dnf/history.*; \
+    rm -rf /var/log/{dnf.*,hawkey.log}; \
+    rm -rf /tmp/venv
