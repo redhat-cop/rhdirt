@@ -1,2 +1,4 @@
 libnsl
 iputils
+unzip
+ansible-core
