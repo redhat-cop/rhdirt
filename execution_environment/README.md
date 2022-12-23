@@ -39,3 +39,9 @@ podman build -t quay.io/hfenner/builder-image
 podman push quay.io/hfenner/builder-image
 podman push quay.io/hfenner/base-image
 ```
+
+#Clear all generated images and exited containers
+If you find yourself building a lot, you may start to run out of space due to the sheer number of containers created.  This command is a nuclear option to clear them all; use with caution!
+```
+podman rmi $(podman images -qa) -f
+```

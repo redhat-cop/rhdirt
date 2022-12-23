@@ -40,6 +40,8 @@
       mode: get
     delegate_to: localhost
     run_once: true
+    tags:
+    - never
 
   - name: Extract the AAP bundle
     ansible.builtin.unarchive:
@@ -47,6 +49,8 @@
       dest: "/tmp" 
     delegate_to: localhost
     run_once: true
+    tags:
+    - never
 
   - name: Run Ansible setup 
     template: 
@@ -54,11 +58,15 @@
       dest: "/tmp/{{ aap_bundle | splitext | first | splitext | first }}/inventory"
     delegate_to: localhost
     run_once: true
+    tags:
+    - never
 
   - name: Run the setup command
     command: "/tmp/{{ aap_bundle | splitext | first | splitext | first }}/setup.sh -- -b"
     delegate_to: localhost
     run_once: true
+    tags:
+    - never
 
       
 
