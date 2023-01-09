@@ -1,0 +1,47 @@
+all:
+  children:
+    installationserver: 
+      hosts:
+        localhost:
+      vars: 
+        aap_setup_down_offline_token: "{{ rh_offline_token }}"
+        aap_setup_down_version: 2.3
+        aap_setup_down_dest_dir: "{{ playbook_dir }}" 
+        aap_setup_down_type: setup 
+        aap_setup_rhel_version: 8
+        aap_setup_prep_working_dir: "{{ playbook_dir }}" 
+        controller_hostname: aac.dragonslair.dev 
+        controller_username: admin
+        controller_password: "{{ aap_admin_password }}"
+        controller_validate_certs: false
+        ah_hostname: aah.dragonslair.dev
+        ah_username: admin
+        ah_password: "{{ aap_admin_password }}"
+        ah_validate_certs: false
+        aap_setup_inst_force: true
+        aap_setup_prep_inv_nodes:
+          automationcontroller:
+            aac.dragonslair.dev: 'ansible_become=True'
+          automationhub:
+            aah.dragonslair.dev: 'ansible_become=True'
+        aap_setup_prep_inv_vars:
+          all:
+            ansible_ssh_private_key_file: /tmp/machinekey
+            admin_password: "{{ aap_admin_password }}"
+            pg_username: "{{ db_instances[0].username }}"
+            pg_password: "{{ db_instances[0].password }}"
+            pg_host: "{{ aap_postgres_url }}"
+            pg_port: 5432
+            pg_database: anscon
+            pg_sslmode: prefer
+            registry_username: "{{ rh_registry_username }}"
+            registry_password: "{{ rh_registry_password }}"
+            registry_url: registry.redhat.io
+            receptor_listener_port: 27199
+            automationhub_admin_password: "{{ aap_admin_password }}"
+            automationhub_pg_host: "{{ aap_postgres_url }}"
+            automationhub_pg_port: 5432
+            automationhub_pg_database: anshub
+            automationhub_pg_username: "{{ db_instances[0].username }}"
+            automationhub_pg_password: "{{ db_instances[0].password }}"
+            automationhub_pg_sslmode: prefer
