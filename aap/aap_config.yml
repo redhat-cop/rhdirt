@@ -116,6 +116,7 @@
         credential: "{{ env }}_quay_cred" 
         name: "{{ env }}_execution_environment"
         image: quay.io/hfenner/dirt:latest
+        pull: always
         state: "{{ state }}"
   
     - name: Create all job templates
@@ -186,7 +187,6 @@
         playbook: aap/update.yml
         credentials:
         - "{{ env }}_aws_key"
-        - "{{ env }}_machine_credential"
       - name: "{{ env }}_aap_config"
         playbook: aap/aap_config.yml
         credentials:
