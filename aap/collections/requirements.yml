@@ -1,0 +1,5 @@
+---
+collections:
+- name: https://github.com/hfenner/rhdirt.git
+  version: main
+  type: git
