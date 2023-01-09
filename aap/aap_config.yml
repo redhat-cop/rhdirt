@@ -54,12 +54,11 @@
         scm_url: "{{ scm_url }}" 
         credential: "{{ env }}_logic_deploy_key"
   
-    - name: Launch a project with a timeout of 10 seconds
+    - name: Update the project
       ansible.controller.project_update:
         controller_host: "{{ controller_host }}" 
         controller_oauthtoken: "{{ controller_oauthtoken }}"
         project: "{{ env }}_rhdirt"
-        timeout: 10
       when: state != 'absent'
   
     - name: Create inventory
@@ -118,7 +117,7 @@
         image: quay.io/hfenner/dirt:latest
         state: "{{ state }}"
   
-    - name: Create EC2 Job Template
+    - name: Create all job templates
       ansible.controller.job_template:
         name: "{{ item.name }}"
         controller_host: "{{ controller_host }}" 
