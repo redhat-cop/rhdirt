@@ -6,10 +6,10 @@ all:
       vars: 
         aap_setup_down_offline_token: "{{ rh_offline_token }}"
         aap_setup_down_version: 2.3
-        aap_setup_down_dest_dir: "{{ playbook_dir }}" 
+        aap_setup_down_dest_dir: /tmp
         aap_setup_down_type: setup 
         aap_setup_rhel_version: 8
-        aap_setup_prep_working_dir: "{{ playbook_dir }}" 
+        aap_setup_prep_working_dir: /tmp
         controller_hostname: aac.dragonslair.dev 
         controller_username: admin
         controller_password: "{{ aap_admin_password }}"
