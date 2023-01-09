@@ -84,6 +84,7 @@
         source: scm
         source_project: "{{ env }}_rhdirt"
         source_path: aap/inventory
+        update_on_launch: yes
       when: state != 'absent'
   
     - name: Update a inventory source to point to project

@@ -1,4 +1,15 @@
 ---
+- hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+  - name: Copy SSH key to temp
+    ansible.builtin.copy:
+      content: "{{ machine_key }}" 
+      dest: /tmp/machinekey
+      mode: '0600'
+
 - hosts: tag_Environment_viper:&platform_Red_Hat_Enterprise_Linux
 
   tasks:
