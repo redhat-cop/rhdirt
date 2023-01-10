@@ -1,14 +1,3 @@
-- hosts: localhost
-  connection: local
-  gather_facts: false
-
-  tasks:
-  - name: Copy SSH key to temp
-    ansible.builtin.copy:
-      content: "{{ machine_key }}" 
-      dest: /tmp/machinekey
-      mode: '0600'
-
 - hosts: installationserver
   roles:
   - { role: hfenner.aap_utilities.aap_setup_download }
