@@ -28,6 +28,7 @@ all:
             aah.dragonslair.dev: 'ansible_become=True'
         aap_setup_prep_inv_vars:
           all:
+            ansible_user: ec2-user
             ansible_ssh_private_key_file: "{{ privatekeypath }}"
             admin_password: "{{ aap_admin_password }}"
             pg_username: "{{ db_instances[0].username }}"
