@@ -191,7 +191,8 @@
         playbook: aap/aap_config.yml
         credentials:
         - "{{ env }}_aws_key"
-      - name: "{{ env }}_aap_install.yml"
+      - name: "{{ env }}_aap_install"
         playbook: aap/aap_install.yml
         credentials:
         - "{{ env }}_aws_key"
+        - "{{ env }}_machine_credential"
