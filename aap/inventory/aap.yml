@@ -5,6 +5,7 @@ all:
         localhost:
           ansible_connection: local
       vars: 
+        work_dir: "{{ playbook_dir }}"
         aap_setup_down_offline_token: "{{ rh_offline_token }}"
         aap_setup_down_version: 2.3
         aap_setup_down_dest_dir: "{{ playbook_dir }}"
@@ -46,8 +47,8 @@ all:
             automationhub_pg_username: "{{ db_instances[0].username }}"
             automationhub_pg_password: "{{ db_instances[0].password }}"
             automationhub_pg_sslmode: prefer
-            custom_ca_cert: /tmp/isrgx1_root_cert.crt
-            web_server_ssl_key: /tmp/aap.dragonslair.dev.pem
-            web_server_ssl_cert: /tmp/aap.dragonslair.dev.crt
-            automationhub_ssl_key: /tmp/aap.dragonslair.dev.pem
-            automationhub_ssl_cert: /tmp/aap.dragonslair.dev.crt
+            custom_ca_cert: "{{ playbook_dir }}/isrgx1_root_cert.crt"
+            web_server_ssl_key: "{{ playbook_dir }}/aap.dragonslair.dev.pem"
+            web_server_ssl_cert: "{{ playbook_dir }}/aap.dragonslair.dev.crt"
+            automationhub_ssl_key: "{{ playbook_dir }}/aap.dragonslair.dev.pem"
+            automationhub_ssl_cert: "{{ playbook_dir }}/aap.dragonslair.dev.crt"

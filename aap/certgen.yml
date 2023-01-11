@@ -4,6 +4,10 @@
   gather_facts: false
 
   vars:
+    zerossl: https://acme.zerossl.com/v2/DV90
+    letsencrypt: https://acme-v02.api.letsencrypt.org/directory
+    le_staging: https://acme-staging-v02.api.letsencrypt.org/directory
+    acme_directory: "{{ le_staging }}" 
     work_dir: "{{ playbook_dir }}"
 
   tasks:
@@ -60,7 +64,7 @@
       src: "{{ work_dir }}/aap.dragonslair.dev.csr"
       cert: "{{ work_dir }}/aap.dragonslair.dev.crt"
       challenge: dns-01
-      acme_directory: https://acme-v02.api.letsencrypt.org/directory
+      acme_directory: "{{ acme_directory }}"
       remaining_days: 89
     register: challenge
 
@@ -100,7 +104,7 @@
       fullchain: "{{ work_dir }}/aap.dragonslair.dev-fullchain.crt"
       chain: "{{ work_dir }}/aap.dragonslair.dev-intermediate.crt"
       challenge: dns-01
-      acme_directory: https://acme-v02.api.letsencrypt.org/directory
+      acme_directory: "{{ acme_directory }}"
       remaining_days: 60
       data: "{{ challenge }}"
     when: challenge is changed
@@ -138,7 +142,7 @@
     loop:
     - name: aap_platform_key
       value: aap.dragonslair.dev.pem
-    - name: aap_platform_certificate
+    - name: aap_platform_cert
       value: aap.dragonslair.dev-fullchain.crt
     - name: isrgx1_root_cert
       value: isrgx1_root_cert.crt

@@ -10,6 +10,7 @@ all:
     aap_platform_key: "{{ secrets.aap_platform_key }}"
     aap_platform_cert: "{{ secrets.aap_platform_cert }}"
     aap_account_key: "{{ secrets.aap_account_key }}"
+    isrgx1_root_cert: "{{ secrets.isrgx1_root_cert }}"
     key_material: "{{ secrets.machine_ssh_public_key }}"
     machine_key: "{{ secrets.machine_ssh_private_key }}"
     logic_deploy_key: "{{ secrets.logic_deploy_private_key }}"

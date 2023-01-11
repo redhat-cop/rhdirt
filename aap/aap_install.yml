@@ -1,19 +1,21 @@
 ---
 - hosts: installationserver
+  vars:
+    work_dir: "{{ playbook_dir }}"
   pre_tasks:
   - name: Populate TLS key and certificate
     ansible.builtin.copy:
-      content: item.content 
+      content: "{{ item.content }}"
       mode: "{{ item.mode }}"
       dest: "/tmp/{{ item.dest }}"
     loop:
-    - content: aap_platform_key
+    - content: "{{ aap_platform_key }}"
       mode: '0600'
       dest: aap.dragonslair.dev.pem
-    - content: aap_platform_certificate
+    - content: "{{ aap_platform_cert }}"
       mode: '0644'
       dest: aap.dragonslair.dev.crt
-    - content: isrgx1_root_cert
+    - content: "{{ isrgx1_root_cert }}"
       mode: '0644'
       dest: isrgx1_root_cert.crt
   roles:
