@@ -1,0 +1,144 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    work_dir: "{{ playbook_dir }}"
+
+  tasks:
+  - name: Populate TLS key and certificate
+    ansible.builtin.copy:
+      content: "{{ item.content }}"
+      mode: "{{ item.mode }}"
+      dest: "{{ work_dir }}/{{ item.dest }}"
+    when: item.content is defined
+    loop:
+    - content: "{{ aap_platform_key }}"
+      mode: '0600'
+      dest: aap.dragonslair.dev.pem
+    - content: "{{ aap_platform_cert }}"
+      mode: '0644'
+      dest: aap.dragonslair.dev.crt
+    - content: "{{ aap_account_key }}"
+      mode: '0600'
+      dest: aap_account_key.pem
+    - content: "{{ isrgx1_root_cert }}"
+      mode: '0644'
+      dest: isrgx1_root_cert.crt
+
+  - name: Create or validate account key
+    community.crypto.openssl_privatekey:
+      path: "{{ work_dir }}/aap_account_key.pem"
+      size: 4096
+      state: present
+
+  - name: Create or validate ISRGX1 root certificate
+    ansible.builtin.copy:
+      content: "{{ lookup('ansible.builtin.url', 'https://letsencrypt.org/certs/isrgrootx1.pem') }}"
+      dest: "{{ work_dir }}/isrgx1_root_cert.crt"
+      mode: '0644'
+
+  - name: Generate private key
+    community.crypto.openssl_privatekey:
+      path: "{{ work_dir }}/aap.dragonslair.dev.pem"
+      size: 4096
+      state: present
+
+  - name: Generate CSR for private key
+    community.crypto.openssl_csr:
+      path: "{{ work_dir}}/aap.dragonslair.dev.csr"
+      privatekey_path: "{{ work_dir }}/aap.dragonslair.dev.pem"
+      common_name: aap.dragonslair.dev
+      subject_alt_name: "DNS:aap.dragonslair.dev,DNS:aac.dragonslair.dev,DNS:aah.dragonslair.dev,DNS:sso.dragonslair.dev,DNS:asc.dragonslair.dev"
+
+  - name: create acme challenge
+    community.crypto.acme_certificate:
+      acme_version: 2
+      terms_agreed: yes
+      account_key_src: "{{ work_dir }}/aap_account_key.pem"
+      src: "{{ work_dir }}/aap.dragonslair.dev.csr"
+      cert: "{{ work_dir }}/aap.dragonslair.dev.crt"
+      challenge: dns-01
+      acme_directory: https://acme-v02.api.letsencrypt.org/directory
+      remaining_days: 89
+    register: challenge
+
+  - debug:
+      msg: "{{ challenge }}"
+
+  - name: Write out challenge to file
+    ansible.builtin.copy:
+      content: "{{ challenge }}"
+      dest: "{{ work_dir }}/challenge"
+      mode: '0644'
+
+  - amazon.aws.route53:
+      zone: dragonslair.dev 
+      record: "{{ challenge.challenge_data[item]['dns-01'].record }}"
+      type: TXT
+      ttl: 60
+      state: present
+      wait: yes
+      overwrite: true
+      value: "{{ challenge.challenge_data[item]['dns-01'].resource_value | regex_replace('^(.*)$', '\"\\1\"') }}"
+    when: challenge is changed
+    loop:
+    - aap.dragonslair.dev
+    - aac.dragonslair.dev
+    - aah.dragonslair.dev
+    - sso.dragonslair.dev
+    - asc.dragonslair.dev
+
+
+  - name: Validate acme challenge
+    community.crypto.acme_certificate:
+      acme_version: 2 
+      account_key_src: "{{ work_dir }}/aap_account_key.pem"
+      src: "{{ work_dir }}/aap.dragonslair.dev.csr"
+      cert: "{{ work_dir}}/aap.dragonslair.dev.crt"
+      fullchain: "{{ work_dir }}/aap.dragonslair.dev-fullchain.crt"
+      chain: "{{ work_dir }}/aap.dragonslair.dev-intermediate.crt"
+      challenge: dns-01
+      acme_directory: https://acme-v02.api.letsencrypt.org/directory
+      remaining_days: 60
+      data: "{{ challenge }}"
+    when: challenge is changed
+
+  - name: Delete challenge data 
+    amazon.aws.route53:
+      zone: dragonslair.dev
+      record: "{{ challenge.challenge_data[item]['dns-01'].record }}"
+      type: TXT
+      state: absent
+      wait: yes
+      value: "{{ challenge.challenge_data[item]['dns-01'].resource_value | regex_replace('^(.*)$', '\"\\1\"') }}"
+    when: challenge is changed
+    loop:
+    - aap.dragonslair.dev
+    - aac.dragonslair.dev
+    - aah.dragonslair.dev
+    - sso.dragonslair.dev
+    - asc.dragonslair.dev
+  
+  - name: Add account key to parameter store
+    community.aws.ssm_parameter:
+      name: "/{{ env }}/aap_account_key"
+      region: us-east-2
+      string_type: "SecureString"
+      value: "{{ lookup('file', work_dir + '/aap_account_key.pem') }}"
+
+  - name: Add key and cert to parameter store
+    community.aws.ssm_parameter:
+      name: "/{{ env }}/{{ item.name }}"
+      region: us-east-2
+      string_type: "SecureString"
+      value: "{{ lookup('file', work_dir + '/' + item.value) }}"
+      tier: Advanced
+    loop:
+    - name: aap_platform_key
+      value: aap.dragonslair.dev.pem
+    - name: aap_platform_certificate
+      value: aap.dragonslair.dev-fullchain.crt
+    - name: isrgx1_root_cert
+      value: isrgx1_root_cert.crt

@@ -10,7 +10,7 @@ all:
         aap_setup_down_dest_dir: "{{ playbook_dir }}"
         aap_setup_down_type: setup 
         aap_setup_rhel_version: 8
-        aap_setup_prep_working_dir: "{{ playbook_dir }}"
+        aap_setup_prep_working_dir: "{{ playbook_dir }}" 
         controller_hostname: aac.dragonslair.dev 
         controller_username: admin
         controller_password: "{{ aap_admin_password }}"
@@ -46,3 +46,8 @@ all:
             automationhub_pg_username: "{{ db_instances[0].username }}"
             automationhub_pg_password: "{{ db_instances[0].password }}"
             automationhub_pg_sslmode: prefer
+            custom_ca_cert: /tmp/isrgx1_root_cert.crt
+            web_server_ssl_key: /tmp/aap.dragonslair.dev.pem
+            web_server_ssl_cert: /tmp/aap.dragonslair.dev.crt
+            automationhub_ssl_key: /tmp/aap.dragonslair.dev.pem
+            automationhub_ssl_cert: /tmp/aap.dragonslair.dev.crt

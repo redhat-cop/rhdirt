@@ -1,5 +1,21 @@
 ---
 - hosts: installationserver
+  pre_tasks:
+  - name: Populate TLS key and certificate
+    ansible.builtin.copy:
+      content: item.content 
+      mode: "{{ item.mode }}"
+      dest: "/tmp/{{ item.dest }}"
+    loop:
+    - content: aap_platform_key
+      mode: '0600'
+      dest: aap.dragonslair.dev.pem
+    - content: aap_platform_certificate
+      mode: '0644'
+      dest: aap.dragonslair.dev.crt
+    - content: isrgx1_root_cert
+      mode: '0644'
+      dest: isrgx1_root_cert.crt
   roles:
   - { role: hfenner.aap_utilities.aap_setup_download }
   - { role: hfenner.aap_utilities.aap_setup_prepare }
