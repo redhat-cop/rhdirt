@@ -1,8 +1,11 @@
 ---
 - hosts: installationserver
   pre_tasks:
-  - debug:
-      var: ansible_env
+  - name: Ensure SSH home dir exists
+    file:
+      path: /home/runner/.ssh
+      state: directory
+      mode: '0700'
 
   - name: Copy SSH key to temp
     ansible.builtin.copy:
