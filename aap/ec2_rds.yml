@@ -59,10 +59,6 @@
       region: "{{ aws_region }}"
     register: new_database_info
 
-  - debug:
-      msg: "{{ new_database_info.instances | selectattr('db_instance_identifier', 'equalto', item.db_instance_identifier) | map(attribute='endpoint.address') | join }}"
-    loop: "{{ db_instances }}"
-
   - name: add/remove dns record 
     amazon.aws.route53:
       state: "{{ state }}"
