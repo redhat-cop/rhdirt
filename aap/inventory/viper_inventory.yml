@@ -11,11 +11,13 @@ all:
     aap_platform_cert: "{{ secrets.aap_platform_cert }}"
     aap_account_key: "{{ secrets.aap_account_key }}"
     isrgx1_root_cert: "{{ secrets.isrgx1_root_cert }}"
+    le_staging_root_cert:
     key_material: "{{ secrets.machine_ssh_public_key }}"
     machine_key: "{{ secrets.machine_ssh_private_key }}"
     logic_deploy_key: "{{ secrets.logic_deploy_private_key }}"
     win_domain: "ad.{{ zone }}"
     win_initial_password: "{{ secrets.win_initial_password }}"
+    jks_password: "{{ win_initial_password }}" 
     security_groups:
     - name: rhel
       description: Red Hat Firewall Ports

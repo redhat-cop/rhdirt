@@ -23,12 +23,17 @@ all:
         aap_setup_inst_force: true
         aap_setup_prep_inv_nodes:
           automationcontroller:
-            aac.dragonslair.dev: 'ansible_become=True'
+            aac.dragonslair.dev:
           automationhub:
-            aah.dragonslair.dev: 'ansible_become=True'
+            aah.dragonslair.dev: 
+          automationcatalog:
+            asc.dragonslair.dev:
+          sso:
+            sso.dragonslair.dev:
         aap_setup_prep_inv_vars:
           all:
             ansible_user: ec2-user
+            ansible_become: True
             admin_password: "{{ aap_admin_password }}"
             pg_username: "{{ db_instances[0].username }}"
             pg_password: "{{ db_instances[0].password }}"
@@ -47,6 +52,14 @@ all:
             automationhub_pg_username: "{{ db_instances[0].username }}"
             automationhub_pg_password: "{{ db_instances[0].password }}"
             automationhub_pg_sslmode: prefer
+            automationcatalog_admin_password: "{{ aap_admin_password }}"
+            automationcatalog_pg_host: "{{ aap_postgres_url }}"
+            automationcatalog_pg_port: 5432
+            automationcatalog_pg_database: anscat
+            automationcatalog_pg_username: "{{ db_instances[0].username }}"
+            automationcatalog_pg_password: "{{ db_instances[0].password }}"
+            automationcatalog_pg_sslmode: prefer
+            sso_console_admin_password: "{{ aap_admin_password }}"
             custom_ca_cert: "{{ playbook_dir }}/isrgx1_root_cert.crt"
             web_server_ssl_key: "{{ playbook_dir }}/aap.dragonslair.dev.pem"
             web_server_ssl_cert: "{{ playbook_dir }}/aap.dragonslair.dev.crt"

@@ -7,7 +7,7 @@
     ansible.builtin.copy:
       content: "{{ item.content }}"
       mode: "{{ item.mode }}"
-      dest: "/tmp/{{ item.dest }}"
+      dest: "{{ work_dir }}/{{ item.dest }}"
     loop:
     - content: "{{ aap_platform_key }}"
       mode: '0600'
