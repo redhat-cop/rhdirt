@@ -1,0 +1,69 @@
+all:
+  vars:
+    nolog: True
+    seed:
+    - name: aws_access_key
+      description: AWS Access Key
+      value: "{{ lookup('ansible.builtin.env', 'AWS_ACCESS_KEY_ID') }}"
+    - name: aws_secret_key
+      description: AWS Secret Key
+      value: "{{ lookup('ansible.builtin.env', 'AWS_SECRET_ACCESS_KEY') }}"
+    - name: github_oauth_token
+      description: oauth token to access Github
+      value: "{{ lookup('ansible.builtin.env', 'GITHUB_OAUTH_TOKEN') }}"
+    - name: quay_username
+      description: Username for quay.io
+      value: "{{ lookup('ansible.builtin.env', 'QUAY_USERNAME') }}"
+    - name: quay_password
+      description: Password for quay.io
+      value: "{{ lookup('ansible.builtin.env', 'QUAY_PASSWORD') }}"
+    - name: rhsm_username
+      description: Username for RHSM
+      value: "{{ lookup('ansible.builtin.env', 'RHSM_USERNAME') }}"
+    - name: rhsm_password
+      description: Password for RHSM
+      value: "{{ lookup('ansible.builtin.env', 'RHSM_PASSWORD') }}"
+    - name: db_username
+      description: Username for AAP Database
+      value: "{{ lookup('ansible.builtin.env', 'DB_USERNAME') }}"
+    - name: db_password
+      description: Password for AAP Database
+      value: "{{ lookup('ansible.builtin.env', 'DB_PASSWORD') }}"
+    - name: pool_id
+      description: Subscription pool for Red Hat installation
+      value: "{{ lookup('ansible.builtin.env', 'POOL_ID') }}"
+    - name: win_initial_password
+      description: Initial password for subscribing systems
+      value: "{{ lookup('ansible.builtin.env', 'WIN_INITIAL_PASSWORD') }}"
+    - name: controller_host
+      description: URL to access Ansible Automation Platform
+      value: "{{ lookup('ansible.builtin.env', 'CONTROLLER_HOST') }}"
+    - name: controller_oauth_token
+      description: oauth token to access Ansible Automation Platform
+      value: "{{ lookup('ansible.builtin.env', 'CONTROLLER_OAUTH_TOKEN') }}"
+    - name: aap_admin_username
+      description: Admin username for AAP platform
+      value: "{{ lookup('ansible.builtin.env', 'AAP_USERNAME') }}"
+    - name: aap_admin_password
+      description: Admin password for AAP platform
+      value: "{{ lookup('ansible.builtin.env', 'AAP_PASSWORD') }}"
+    - name: rh_registry_username
+      description: Red Hat Registry Username
+      value: "{{ lookup('ansible.builtin.env', 'RH_REGISTRY_USERNAME') }}"
+    - name: rh_registry_password
+      description: Red Hat Registry Password
+      value: "{{ lookup('ansible.builtin.env', 'RH_REGISTRY_PASSWORD') }}"
+    - name: rh_offline_token
+      description: Red Hat Token
+      value: "{{ lookup('ansible.builtin.env', 'RH_OFFLINE_TOKEN') }}"
+    deploy_keys:
+    - owner: hfenner
+      repository: rhdirt
+      title: logic-deploy-key
+      created_key: "{{ lookup('aws_ssm', '/' + env + '/logic_deploy_public_key', region=aws_region, on_missing='skip') }}"
+      token: "{{ seed | selectattr('name', 'equalto', 'github_oauth_token') | map(attribute='value') | join }}"
+    - owner: napsetsre
+      repository: viper
+      title: vault-deploy-key
+      created_key: "{{ lookup('aws_ssm', '/' + env + '/vault_deploy_public_key', region=aws_region, on_missing='skip') }}"
+      token: "{{ seed | selectattr('name', 'equalto', 'github_oauth_token') | map(attribute='value') | join }}"

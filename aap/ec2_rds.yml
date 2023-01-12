@@ -27,8 +27,7 @@
       user_data: "{{ item.user_data | default(omit) }}" 
       security_group: "{{ item.security_group }}"
       region: "{{ aws_region }}"
-      tags:
-        Environment: "{{ env }}"
+      tags: "{{ item.tags }}"
       volumes:
         - device_name: /dev/sda1
           ebs:
@@ -55,7 +54,25 @@
       sec_group_id: "{{ provisioned_security_groups.security_groups | selectattr('group_name', 'equalto', item.vpc_security_group_name) | map(attribute='group_id') }}"
     loop: "{{ db_instances }}"
 
-  - name: Add/Remove DNS Record 
+  - name: Get information about an instance
+    amazon.aws.rds_instance_info:
+      region: "{{ aws_region }}"
+    register: new_database_info
+
+  - name: add/remove dns record 
+    amazon.aws.route53:
+      state: "{{ state }}"
+      zone: "{{ zone }}"
+      record: "{{ item.db_instance_identifier }}.{{ zone }}"
+      type: CNAME
+      ttl: 7200
+      value: "{{ dns_name | ternary(dns_name,omit) }}" 
+      wait: true
+    vars:
+      dns_name: "{{ new_database_info.instances | selectattr('db_instance_identifier', 'equalto', item.db_instance_identifier) | map(attribute='endpoint.address') | join }}"
+    loop: "{{ db_instances }}"
+
+  - name: add/remove dns record 
     amazon.aws.route53:
       state: "{{ state }}"
       zone: "{{ zone }}"

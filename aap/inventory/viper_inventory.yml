@@ -2,11 +2,22 @@ all:
   vars:
     state: present
     env: viper
-    aws_region: us-east-2
     zone: dragonslair.dev
-    key_material: "{{ lookup('aws_ssm', '/' + env + '/machine_ssh_public_key', region=aws_region) }}"
+    aws_access_key_id: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
+    aws_secret_access_key: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
+    aws_region: us-east-2
+    secrets: "{{ lookup('amazon.aws.aws_ssm','/' + env,region=aws_region,aws_access_key=aws_access_key_id,aws_secret_key=aws_secret_access_key,shortnames=true,bypath=true,recursive=true) }}"
+    aap_platform_key: "{{ secrets.aap_platform_key }}"
+    aap_platform_cert: "{{ secrets.aap_platform_cert }}"
+    aap_account_key: "{{ secrets.aap_account_key }}"
+    isrgx1_root_cert: "{{ secrets.isrgx1_root_cert }}"
+    le_staging_root_cert:
+    key_material: "{{ secrets.machine_ssh_public_key }}"
+    machine_key: "{{ secrets.machine_ssh_private_key }}"
+    logic_deploy_key: "{{ secrets.logic_deploy_private_key }}"
     win_domain: "ad.{{ zone }}"
-    win_initial_password: "{{ lookup('aws_ssm', '/' + env + '/win_initial_password', region=aws_region) }}"
+    win_initial_password: "{{ secrets.win_initial_password }}"
+    jks_password: "{{ win_initial_password }}" 
     security_groups:
     - name: rhel
       description: Red Hat Firewall Ports
@@ -14,6 +25,8 @@ all:
       - proto: tcp
         ports:
         - 22
+        - 80
+        - 443
         cidr_ip: 0.0.0.0/0
         rule_desc: Allow all SSH
     - name: windows 
@@ -35,29 +48,64 @@ all:
         rule_desc: Allow Postgres connections
     aap_repository: ansible-automation-platform-2.2-for-rhel-8-x86_64-rpms
     aap_bundle: ansible-automation-platform-setup-2.2.0-8.tar.gz 
+    aap_admin_password: "{{ secrets.aap_admin_password }}"
+    aap_postgres_url: "{{ db_instances[0].db_instance_identifier }}.{{ zone }}"
     bucket: "{{ env }}-artifacts"
-    pool_id: "{{ lookup('aws_ssm', '/' + env + '/pool_id', region=aws_region) }}"
-    rhsm_username: "{{ lookup('aws_ssm', '/' + env + '/rhsm_username', region=aws_region) }}"
-    rhsm_password: "{{ lookup('aws_ssm', '/' + env + '/rhsm_password', region=aws_region) }}"
+    pool_id: "{{ secrets.pool_id }}"
+    rhsm_username: "{{ secrets.rhsm_username }}"
+    rhsm_password: "{{ secrets.rhsm_password }}"
+    rh_registry_username: "{{ secrets.rh_registry_username }}"
+    rh_registry_password: "{{ secrets.rh_registry_password }}"
+    quay_username: "{{ secrets.quay_username }}"
+    quay_password: "{{ secrets.quay_password }}"
+    controller_host: https://example-ansible-automation-platform.apps.fire.dragonslair.dev 
+    controller_oauthtoken: "{{ secrets.controller_oauth_token }}"
+    rh_offline_token: "{{ secrets.rh_offline_token }}"
+    scm_url: git@github.com:hfenner/rhdirt.git
     instances:
-    - name: subversion
-      instance_type: t2.micro
+    - name: aac
+      instance_type: m5.xlarge
       image_id: ami-092b43193629811af
       vpc_subnet_id: subnet-56fd641a
       security_group: rhel
       volume_size: 100
-    - name: windows
-      instance_type: t2.micro
+      tags:
+        Environment: "{{ env }}"
+        Role: aac
+    - name: aah
+      instance_type: m5.xlarge
+      image_id: ami-092b43193629811af
+      vpc_subnet_id: subnet-56fd641a
+      security_group: rhel
+      volume_size: 100
+      tags:
+        Environment: "{{ env }}"
+        Role: aah
+    - name: dc01
+      instance_type: m5.xlarge
       image_id: ami-0aea78c3dfdcbb8cd
       vpc_subnet_id: subnet-56fd641a
       user_data: "{{ lookup('template', 'win_userdata.j2') }}"
       security_group: windows
       volume_size: 100
+      tags:
+        Environment: "{{ env }}"
+        Role: dc
+    - name: tomcat
+      instance_type: m5.xlarge
+      image_id: ami-0aea78c3dfdcbb8cd
+      vpc_subnet_id: subnet-56fd641a
+      user_data: "{{ lookup('template', 'win_userdata.j2') }}"
+      security_group: windows
+      volume_size: 100
+      tags:
+        Environment: "{{ env }}"
+        Role: tomcat
     db_instances:
     - db_instance_identifier: aapdb
-      instance_type: db.t4g.small
-      username: "{{ lookup('aws_ssm', '/' + env + '/db_username', region=aws_region) }}"
-      password: "{{ lookup('aws_ssm', '/' + env + '/db_password', region=aws_region) }}"
+      instance_type: db.t4g.xlarge
+      username: "{{ secrets.db_username }}"
+      password: "{{ secrets.db_password }}"
       vpc_subnet_id: subnet-56fd641a
       vpc_security_group_name: postgres
       allocated_storage: 100
@@ -69,9 +117,10 @@ all:
     platform_Red_Hat_Enterprise_Linux:
       vars:
         ansible_user: ec2-user
+        ansible_ssh_private_key_file: /tmp/machinekey
     platform_Windows:
       vars:
         ansible_connection: winrm
         ansible_winrm_server_cert_validation: ignore
         ansible_user: administrator
-        ansible_password: "{{ win_initial_password }}"
+        ansible_password: "{{ secrets.win_initial_password }}"

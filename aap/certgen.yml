@@ -1,0 +1,161 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    zerossl: 
+      directory: https://acme.zerossl.com/v2/DV90
+    letsencrypt: 
+      directory: https://acme-v02.api.letsencrypt.org/directory
+      root_cert_url: https://letsencrypt.org/certs/isrgrootx1.pem
+      file: isrgrootx1.pem
+    le_staging: 
+      directory: https://acme-staging-v02.api.letsencrypt.org/directory
+      root_cert_url: https://letsencrypt.org/certs/staging/letsencrypt-stg-root-x1.pem 
+      file: letsencrypt-stg-root-x1.pem 
+    acme_directory: "{{ le_staging }}" 
+    work_dir: "{{ playbook_dir }}"
+    domains: 
+    - aap.dragonslair.dev
+    - aac.dragonslair.dev
+    - aah.dragonslair.dev
+    - sso.dragonslair.dev
+    - asc.dragonslair.dev
+
+  tasks:
+  - name: Populate TLS key and certificate
+    ansible.builtin.copy:
+      content: "{{ item.content }}"
+      mode: "{{ item.mode }}"
+      dest: "{{ work_dir }}/{{ item.dest }}"
+    when: item.content is defined
+    loop:
+    - content: "{{ aap_platform_key }}"
+      mode: '0600'
+      dest: aap.dragonslair.dev.pem
+    - content: "{{ aap_platform_cert }}"
+      mode: '0644'
+      dest: aap.dragonslair.dev.crt
+    - content: "{{ aap_account_key }}"
+      mode: '0600'
+      dest: aap_account_key.pem
+    - content: "{{ isrgx1_root_cert }}"
+      mode: '0644'
+      dest: isrgx1_root_cert.crt
+    tags:
+    - never
+
+  - name: Create or validate account key
+    community.crypto.openssl_privatekey:
+      path: "{{ work_dir }}/aap_account_key.pem"
+      size: 4096
+      state: present
+
+  - name: Fetch Lets Encrypt Root Certificate 
+    ansible.builtin.get_url:
+      url: "{{ acme_directory.root_cert_url }}"
+      dest: "{{ work_dir }}/{{ acme_directory.file }}"
+      mode: '0644'
+
+  - name: Generate private key
+    community.crypto.openssl_privatekey:
+      path: "{{ work_dir }}/aap.dragonslair.dev.pem"
+      size: 4096
+      state: present
+
+  - name: Generate CSR for private key
+    community.crypto.openssl_csr:
+      path: "{{ work_dir}}/aap.dragonslair.dev.csr"
+      privatekey_path: "{{ work_dir }}/aap.dragonslair.dev.pem"
+      common_name: aap.dragonslair.dev
+      subject_alt_name: "DNS:{{ domains | join(',DNS:') }}"
+
+  - name: create acme challenge
+    community.crypto.acme_certificate:
+      acme_version: 2
+      terms_agreed: yes
+      account_key_src: "{{ work_dir }}/aap_account_key.pem"
+      src: "{{ work_dir }}/aap.dragonslair.dev.csr"
+      cert: "{{ work_dir }}/aap.dragonslair.dev.crt"
+      challenge: dns-01
+      acme_directory: "{{ acme_directory.directory }}"
+      remaining_days: 89
+    register: challenge
+
+  - name: Write out challenge to file
+    ansible.builtin.copy:
+      content: "{{ challenge }}"
+      dest: "{{ work_dir }}/challenge"
+      mode: '0644'
+
+  - amazon.aws.route53:
+      zone: dragonslair.dev 
+      record: "{{ dns_challenge.dns_record }}"
+      type: TXT
+      ttl: 60
+      state: present
+      wait: yes
+      overwrite: true
+      #For whatever reason, dns_value is a list with one item
+      value: "{{ dns_challenge.dns_value[0] }}"
+    when: challenge is changed
+    vars:
+      dns_challenge: "{{ challenge.challenge_data_dns | dict2items(key_name='dns_record', value_name='dns_value') }}"
+    loop: "{{ dns_challenge }}"
+
+
+  - name: Validate acme challenge
+    community.crypto.acme_certificate:
+      acme_version: 2 
+      account_key_src: "{{ work_dir }}/aap_account_key.pem"
+      src: "{{ work_dir }}/aap.dragonslair.dev.csr"
+      cert: "{{ work_dir}}/aap.dragonslair.dev.crt"
+      fullchain: "{{ work_dir }}/aap.dragonslair.dev-fullchain.crt"
+      chain: "{{ work_dir }}/aap.dragonslair.dev-intermediate.crt"
+      challenge: dns-01
+      acme_directory: "{{ acme_directory.directory }}"
+      remaining_days: 60
+      data: "{{ challenge }}"
+    when: challenge is changed
+
+  - amazon.aws.route53:
+      zone: dragonslair.dev 
+      record: "{{ dns_challenge.dns_record }}"
+      type: TXT
+      ttl: 60
+      state: absent
+      wait: yes
+      overwrite: true
+      #For whatever reason, dns_value is a list with one item
+      value: "{{ dns_challenge.dns_value[0] }}"
+    when: challenge is changed
+    vars:
+      dns_challenge: "{{ challenge.challenge_data_dns | dict2items(key_name='dns_record', value_name='dns_value') }}"
+    loop: "{{ dns_challenge }}"
+  
+  - name: Add account key to parameter store
+    community.aws.ssm_parameter:
+      name: "/{{ env }}/aap_account_key"
+      region: us-east-2
+      string_type: "SecureString"
+      value: "{{ lookup('file', work_dir + '/aap_account_key.pem') }}"
+    tags:
+    - never
+
+  - name: Add key and cert to parameter store
+    community.aws.ssm_parameter:
+      name: "/{{ env }}/{{ item.name }}"
+      region: us-east-2
+      string_type: "SecureString"
+      value: "{{ lookup('file', work_dir + '/' + item.value) }}"
+      tier: Advanced
+    loop:
+    - name: aap_platform_key
+      value: aap.dragonslair.dev.pem
+    - name: aap_platform_cert
+      value: aap.dragonslair.dev-fullchain.crt
+    - name: isrgx1_root_cert
+      value: isrgx1_root_cert.crt
+    tags:
+    - never

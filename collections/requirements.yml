@@ -1,0 +1,6 @@
+---
+collections:
+- name: hfenner.aap_utilities
+  source: https://github.com/hfenner/aap_utilities.git
+  version: devel
+  type: git

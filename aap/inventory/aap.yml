@@ -1,0 +1,67 @@
+all:
+  children:
+    installationserver: 
+      hosts:
+        localhost:
+          ansible_connection: local
+      vars: 
+        work_dir: "{{ playbook_dir }}"
+        aap_setup_down_offline_token: "{{ rh_offline_token }}"
+        aap_setup_down_version: 2.3
+        aap_setup_down_dest_dir: "{{ playbook_dir }}"
+        aap_setup_down_type: setup 
+        aap_setup_rhel_version: 8
+        aap_setup_prep_working_dir: "{{ playbook_dir }}" 
+        controller_hostname: aac.dragonslair.dev 
+        controller_username: admin
+        controller_password: "{{ aap_admin_password }}"
+        controller_validate_certs: false
+        ah_hostname: aah.dragonslair.dev
+        ah_username: admin
+        ah_password: "{{ aap_admin_password }}"
+        ah_validate_certs: false
+        aap_setup_inst_force: true
+        aap_setup_prep_inv_nodes:
+          automationcontroller:
+            aac.dragonslair.dev:
+          automationhub:
+            aah.dragonslair.dev: 
+          automationcatalog:
+            asc.dragonslair.dev:
+          sso:
+            sso.dragonslair.dev:
+        aap_setup_prep_inv_vars:
+          all:
+            ansible_user: ec2-user
+            ansible_become: True
+            admin_password: "{{ aap_admin_password }}"
+            pg_username: "{{ db_instances[0].username }}"
+            pg_password: "{{ db_instances[0].password }}"
+            pg_host: "{{ aap_postgres_url }}"
+            pg_port: 5432
+            pg_database: anscon
+            pg_sslmode: prefer
+            registry_username: "{{ rh_registry_username }}"
+            registry_password: "{{ rh_registry_password }}"
+            registry_url: registry.redhat.io
+            receptor_listener_port: 27199
+            automationhub_admin_password: "{{ aap_admin_password }}"
+            automationhub_pg_host: "{{ aap_postgres_url }}"
+            automationhub_pg_port: 5432
+            automationhub_pg_database: anshub
+            automationhub_pg_username: "{{ db_instances[0].username }}"
+            automationhub_pg_password: "{{ db_instances[0].password }}"
+            automationhub_pg_sslmode: prefer
+            automationcatalog_admin_password: "{{ aap_admin_password }}"
+            automationcatalog_pg_host: "{{ aap_postgres_url }}"
+            automationcatalog_pg_port: 5432
+            automationcatalog_pg_database: anscat
+            automationcatalog_pg_username: "{{ db_instances[0].username }}"
+            automationcatalog_pg_password: "{{ db_instances[0].password }}"
+            automationcatalog_pg_sslmode: prefer
+            sso_console_admin_password: "{{ aap_admin_password }}"
+            custom_ca_cert: "{{ playbook_dir }}/isrgx1_root_cert.crt"
+            web_server_ssl_key: "{{ playbook_dir }}/aap.dragonslair.dev.pem"
+            web_server_ssl_cert: "{{ playbook_dir }}/aap.dragonslair.dev.crt"
+            automationhub_ssl_key: "{{ playbook_dir }}/aap.dragonslair.dev.pem"
+            automationhub_ssl_cert: "{{ playbook_dir }}/aap.dragonslair.dev.crt"

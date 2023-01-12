@@ -1,0 +1,117 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+  - name: Populate SSH key if exists
+    ansible.builtin.copy:
+      content: "{{ lookup('aws_ssm', '/' + env + '/' + item.name, region=aws_region, on_missing='skip') }}"
+      mode: "{{ item.mode }}"
+      dest: "/tmp/{{ item.dest }}"
+    when: lookup('aws_ssm', '/' + env + '/' + item.name, region=aws_region, on_missing='skip')
+    loop:
+    - name: machine_ssh_private_key
+      mode: '0600'
+      dest: machine
+    - name: machine_ssh_public_key
+      mode: '0644'
+      dest: machine.pub
+    - name: logic_deploy_private_key
+      mode: '0600'
+      dest: logic
+    - name: logic_deploy_public_key
+      mode: '0644'
+      dest: logic.pub
+    no_log: "{{ nolog }}"
+
+  - name: Create or validate SSH Key
+    community.crypto.openssh_keypair:
+      path: "/tmp/{{ item.name }}"
+      state: "{{ state }}"
+    loop:
+    - name: machine
+    - name: vault
+    - name: logic
+    no_log: "{{ nolog }}"
+
+  - name: Create or delete SSH key parameter
+    community.aws.ssm_parameter:
+      name: "/{{ env }}/{{ item.name }}"
+      description: "{{ env }} {{ item.name }}"
+      string_type: "SecureString"
+      region: "{{ aws_region }}"
+      value: "{{ lookup('file', '/tmp/' + item.file, rstrip=False, errors='ignore') }}"
+      state: "{{ state }}"
+    loop:
+    - name: machine_ssh_private_key
+      file: machine
+    - name: machine_ssh_public_key
+      file: machine.pub
+    - name: vault_deploy_private_key
+      file: vault
+    - name: vault_deploy_public_key
+      file: vault.pub
+    - name: logic_deploy_private_key
+      file: logic
+    - name: logic_deploy_public_key
+      file: logic.pub
+    no_log: "{{ nolog }}"
+
+  - name: Delete deploy keys if different or removing
+    ansible.builtin.uri:
+      url: "{{ isolate[0].url }}"
+      method: DELETE
+      headers:
+        Accept: application/vnd.github+json
+        Authorization: "Bearer {{ item.token }}"
+      status_code: 204
+    when: state == "absent" and isolate | length != 0
+    vars:
+      repo_deploy_keys: "{{ lookup('ansible.builtin.url', 'https://api.github.com/repos/' + item.owner + '/' + item.repository + '/keys', headers={'Accept':'application/vnd.github+json', 'Authorization': 'Bearer ' + item.token} ) }}"
+      isolate: "{{ repo_deploy_keys | selectattr('title', 'equalto', item.title) }}"
+    loop: "{{ deploy_keys }}"
+
+  - name: Create deploy keys
+    ansible.builtin.uri:
+      url: "https://api.github.com/repos/{{ item.owner }}/{{ item.repository }}/keys"
+      method: POST
+      headers:
+        Accept: application/vnd.github+json
+        Authorization: "Bearer {{ item.token }}"
+      status_code: 201
+      body_format: json
+      body:
+        title: "{{ item.title }}"
+        key: "{{ item.created_key }}"
+        read_only: True
+    when: isolate | length == 0 and state != "absent"
+    vars:
+      repo_deploy_keys: "{{ lookup('ansible.builtin.url', 'https://api.github.com/repos/' + item.owner + '/' + item.repository + '/keys', headers={'Accept':'application/vnd.github+json', 'Authorization': 'Bearer ' + item.token} ) }}"
+      isolate: "{{ repo_deploy_keys | selectattr('title', 'equalto', item.title) }}"
+    loop: "{{ deploy_keys }}"
+
+  - name: Create or delete seed parameters
+    community.aws.ssm_parameter:
+      name: "/{{ env }}/{{ item.name }}"
+      description: "{{ item.description }}"
+      string_type: "SecureString"
+      region: "{{ aws_region }}"
+      value: "{{ item.value }}"
+      state: "{{ state }}"
+    loop: "{{ seed }}"
+    no_log: "{{ nolog }}"
+
+  - name: Create an empty bucket
+    amazon.aws.s3_bucket:
+      name: "{{ env }}-artifacts"
+      state: "{{ state }}"
+      force: true
+
+  - name: Upload ansible bundle
+    amazon.aws.s3_object:
+      bucket: "{{ env }}-artifacts"
+      object: ansible-automation-platform-setup-2.2.0-8.tar.gz 
+      src: artifacts/ansible-automation-platform-setup-2.2.0-8.tar.gz
+      mode: put
+    when: state != "absent"

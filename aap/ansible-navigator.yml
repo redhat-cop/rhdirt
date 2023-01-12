@@ -1,11 +1,9 @@
 # # cspell:ignore cmdline, workdir
-# You must `export DIRT_REPO=/path/to/repo` to use this 
+# You must `export LOGIC_REPO=/path/to/repo` to use this 
 # file.
 ---
 ansible-navigator:
   ansible:
-    playbook:
-      path: ${LOGIC_REPO}/aap/ec2instance.yml
     inventory:
       entries:
       - ${LOGIC_REPO}/aap/inventory/
@@ -16,6 +14,22 @@ ansible-navigator:
       pass:
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
+      - GITHUB_OAUTH_TOKEN
+      - QUAY_USERNAME
+      - QUAY_PASSWORD
+      - RHSM_USERNAME
+      - RHSM_PASSWORD
+      - DB_USERNAME
+      - DB_PASSWORD
+      - POOL_ID
+      - WIN_INITIAL_PASSWORD
+      - CONTROLLER_HOST
+      - CONTROLLER_OAUTH_TOKEN
+      - AAP_USERNAME
+      - AAP_PASSWORD
+      - RH_REGISTRY_USERNAME
+      - RH_REGISTRY_PASSWORD
+      - RH_OFFLINE_TOKEN
     image: quay.io/hfenner/dirt:latest
   logging:
     level: critical

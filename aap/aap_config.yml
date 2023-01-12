@@ -1,0 +1,198 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: False
+
+
+  tasks:
+  - name: "Configure creds, project, inventory, and job templates for {{ env }}"
+    block: 
+    - name: Create a valid SCM credential from a private_key file
+      ansible.controller.credential:
+        name: "{{ env }}_logic_deploy_key"
+        controller_host: "{{ controller_host }}" 
+        controller_oauthtoken: "{{ controller_oauthtoken }}"
+        organization: Default
+        state: "{{ state }}"
+        credential_type: Source Control
+        inputs:
+          ssh_key_data: "{{ logic_deploy_key }}"
+
+    - name: Add credential for AWS 
+      ansible.controller.credential:
+        name: "{{ env }}_aws_key"
+        controller_host: "{{ controller_host }}" 
+        controller_oauthtoken: "{{ controller_oauthtoken }}"
+        organization: Default
+        state: "{{ state }}"
+        credential_type: Amazon Web Services
+        inputs:
+          username: "{{ aws_access_key_id }}"
+          password: "{{ aws_secret_access_key }}" 
+
+    - name: Add credential for Machine
+      ansible.controller.credential:
+        name: "{{ env }}_machine_credential"
+        controller_host: "{{ controller_host }}" 
+        controller_oauthtoken: "{{ controller_oauthtoken }}"
+        organization: Default
+        state: "{{ state }}"
+        credential_type: Machine
+        inputs:
+          username: ec2-user
+          ssh_key_data: "{{ machine_key }}" 
+           
+    - name: Add project
+      ansible.controller.project:
+        name: "{{ env }}_rhdirt"
+        controller_host: "{{ controller_host }}" 
+        controller_oauthtoken: "{{ controller_oauthtoken }}"
+        description: "{{ env | capitalize }} logic project"
+        organization: Default
+        state: "{{ state }}"
+        scm_type: git
+        scm_url: "{{ scm_url }}" 
+        credential: "{{ env }}_logic_deploy_key"
+  
+    - name: Update the project
+      ansible.controller.project_update:
+        controller_host: "{{ controller_host }}" 
+        controller_oauthtoken: "{{ controller_oauthtoken }}"
+        project: "{{ env }}_rhdirt"
+      when: state != 'absent'
+  
+    - name: Create inventory
+      ansible.controller.inventory:
+        name: "{{ env }} Inventory"
+        controller_host: "{{ controller_host }}" 
+        controller_oauthtoken: "{{ controller_oauthtoken }}"
+        description: "{{ env }} Inventory"
+        organization: Default
+        state: "{{ state }}"
+  
+    - name: Add inventory source
+      ansible.controller.inventory_source:
+        name: "{{ env }} Inventory Source"
+        description: "{{ env }} Inventory Source"
+        inventory: "{{ env }} Inventory"
+        credential: "{{ env }}_aws_key"
+        controller_host: "{{ controller_host }}" 
+        controller_oauthtoken: "{{ controller_oauthtoken }}"
+        overwrite: True
+        overwrite_vars: True
+        organization: Default
+        source: scm
+        source_project: "{{ env }}_rhdirt"
+        source_path: aap/inventory
+        update_on_launch: yes
+      when: state != 'absent'
+  
+    - name: Update a inventory source to point to project
+      ansible.controller.inventory_source_update:
+        controller_host: "{{ controller_host }}" 
+        controller_oauthtoken: "{{ controller_oauthtoken }}"
+        name: "{{ env }} Inventory Source"
+        inventory: "{{ env }} Inventory"
+        organization: Default
+      when: state != 'absent'
+  
+    - name: Add credential for Quay to pull image
+      ansible.controller.credential:
+        name: "{{ env }}_quay_cred"
+        controller_host: "{{ controller_host }}" 
+        controller_oauthtoken: "{{ controller_oauthtoken }}"
+        organization: Default
+        state: "{{ state }}"
+        credential_type: Container Registry
+        inputs:
+          host: quay.io
+          username: "{{ quay_username }}"
+          password: "{{ quay_password }}" 
+  
+    - name: Add EE to the controller instance
+      ansible.controller.execution_environment:
+        controller_host: "{{ controller_host }}" 
+        controller_oauthtoken: "{{ controller_oauthtoken }}"
+        credential: "{{ env }}_quay_cred" 
+        name: "{{ env }}_execution_environment"
+        image: quay.io/hfenner/dirt:latest
+        pull: always
+        state: "{{ state }}"
+  
+    - name: Create all job templates
+      ansible.controller.job_template:
+        name: "{{ item.name }}"
+        controller_host: "{{ controller_host }}" 
+        controller_oauthtoken: "{{ controller_oauthtoken }}"
+        execution_environment: "{{ env }}_execution_environment"
+        job_type: "run"
+        organization: Default
+        inventory: "{{ env }} Inventory"
+        project: "{{ env }}_rhdirt"
+        playbook: "{{ item.playbook }}"
+        credentials: "{{ item.credentials }}"
+        state: "{{ state }}"
+        extra_vars: "{{ item.extra_vars | default(omit) }}"
+      when: state != 'absent'
+      loop: "{{ job_template }}"
+  
+    #This is really only necessary because the Job Template can't handle a non-existent execution environment
+    - name: Delete EC2 Job Template
+      ansible.controller.job_template:
+        name: "{{ item.name }}"
+        controller_host: "{{ controller_host }}" 
+        controller_oauthtoken: "{{ controller_oauthtoken }}"
+        state: "{{ state }}"
+      when: state == 'absent'
+      loop: "{{ job_template }}"
+  
+    - name: Launch job
+      ansible.controller.job_launch:
+        controller_host: "{{ controller_host }}" 
+        controller_oauthtoken: "{{ controller_oauthtoken }}"
+        job_template: "{{ item.name }}" 
+      when: state != 'absent'
+      loop: "{{ job_template }}"
+      tags: 
+      - never
+
+
+    vars:
+      job_template:
+      - name: "{{ env }}_vpc_provision"
+        playbook: aap/vpc.yml
+        credentials:
+        - "{{ env }}_aws_key"
+      - name: "{{ env }}_vpc_deprovision"
+        playbook: aap/vpc.yml
+        credentials:
+        - "{{ env }}_aws_key"
+        extra_vars:
+          state: absent
+      - name: "{{ env }}_ec2_rds_provision"
+        playbook: aap/ec2_rds.yml
+        credentials:
+        - "{{ env }}_aws_key"
+      - name: "{{ env }}_ec2_rds_deprovision"
+        playbook: aap/ec2_rds.yml
+        credentials:
+        - "{{ env }}_aws_key"
+        extra_vars:
+          state: absent
+      - name: "{{ env }}_database_provision"
+        playbook: aap/database.yml
+        credentials:
+        - "{{ env }}_aws_key"
+      - name: "{{ env }}_update"
+        playbook: aap/update.yml
+        credentials:
+        - "{{ env }}_aws_key"
+      - name: "{{ env }}_aap_config"
+        playbook: aap/aap_config.yml
+        credentials:
+        - "{{ env }}_aws_key"
+      - name: "{{ env }}_aap_install"
+        playbook: aap/aap_install.yml
+        credentials:
+        - "{{ env }}_aws_key"
+        - "{{ env }}_machine_credential"
