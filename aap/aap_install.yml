@@ -18,6 +18,13 @@
     - content: "{{ isrgx1_root_cert }}"
       mode: '0644'
       dest: isrgx1_root_cert.crt
+  - name: Create a keystore for the given certificate/private key pair (with files on controller)
+    community.general.java_keystore:
+      name: aap.dragonslair.dev
+      certificate: "{{ lookup('file', work_dir + '/aap.dragonslair.dev.crt') }}"
+      private_key: "{{ lookup('file', work_dir + '/aap.dragonslair.dev.pem') }}"
+      password: "{{ jks_password }}"
+      dest: "{{ work_dir }}/aap.dragonslair.dev.jks"
   roles:
   - { role: hfenner.aap_utilities.aap_setup_download }
   - { role: hfenner.aap_utilities.aap_setup_prepare }

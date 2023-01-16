@@ -27,6 +27,8 @@ all:
         - 22
         - 80
         - 443
+        - 8080
+        - 8443
         cidr_ip: 0.0.0.0/0
         rule_desc: Allow all SSH
     - name: windows 
@@ -81,6 +83,42 @@ all:
       tags:
         Environment: "{{ env }}"
         Role: aah
+    - name: asc
+      instance_type: m5.xlarge
+      image_id: ami-092b43193629811af
+      vpc_subnet_id: subnet-56fd641a
+      security_group: rhel
+      volume_size: 100
+      tags:
+        Environment: "{{ env }}"
+        Role: asc
+    - name: sso
+      instance_type: m5.xlarge
+      image_id: ami-092b43193629811af
+      vpc_subnet_id: subnet-56fd641a
+      security_group: rhel
+      volume_size: 100
+      tags:
+        Environment: "{{ env }}"
+        Role: sso
+    - name: idm
+      instance_type: m5.xlarge
+      image_id: ami-092b43193629811af
+      vpc_subnet_id: subnet-56fd641a
+      security_group: rhel
+      volume_size: 100
+      tags:
+        Environment: "{{ env }}"
+        Role: idm
+    - name: sat
+      instance_type: d2.xlarge
+      image_id: ami-092b43193629811af
+      vpc_subnet_id: subnet-56fd641a
+      security_group: rhel
+      volume_size: 100
+      tags:
+        Environment: "{{ env }}"
+        Role: sat
     - name: dc01
       instance_type: m5.xlarge
       image_id: ami-0aea78c3dfdcbb8cd

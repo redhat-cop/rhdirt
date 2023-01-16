@@ -60,8 +60,12 @@ all:
             automationcatalog_pg_password: "{{ db_instances[0].password }}"
             automationcatalog_pg_sslmode: prefer
             sso_console_admin_password: "{{ aap_admin_password }}"
+            sso_custom_keystore_file: "{{ playbook_dir }}/aap.dragonslair.dev.jks"
+            sso_keystore_password: "{{ jks_password }}"
             custom_ca_cert: "{{ playbook_dir }}/isrgx1_root_cert.crt"
             web_server_ssl_key: "{{ playbook_dir }}/aap.dragonslair.dev.pem"
             web_server_ssl_cert: "{{ playbook_dir }}/aap.dragonslair.dev.crt"
             automationhub_ssl_key: "{{ playbook_dir }}/aap.dragonslair.dev.pem"
             automationhub_ssl_cert: "{{ playbook_dir }}/aap.dragonslair.dev.crt"
+            automationcatalog_ssl_key: "{{ playbook_dir }}/aap.dragonslair.dev.pem"
+            automationcatalog_ssl_cert: "{{ playbook_dir }}/aap.dragonslair.dev.crt"
