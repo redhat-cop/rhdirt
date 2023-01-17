@@ -1,9 +1,22 @@
 ---
-- name: Add Security Groups and Rules
-  amazon.aws.ec2_security_group:
-    name: "{{ item.name }}"
-    state: "{{ state }}"
-    description: "{{ item.description }}"
-    region: "{{ aws_region }}"
-    rules: "{{ item.rules }}"
-  loop: "{{ security_groups }}"
+- name: Create security groups
+  ansible.builtin.include_tasks:
+    file: securitygroup.yml
+  when: state == 'present'
+
+- name: Create EC2 instances
+  ansible.builtin.include_tasks:
+    file: ec2.yml
+
+- name: Create RDS instances
+  ansible.builtin.include_tasks:
+    file: rds.yml
+
+- name: Create DNS Records
+  ansible.builtin.include_tasks:
+    file: dns.yml
+
+- name: Create security groups
+  ansible.builtin.include_tasks:
+    file: securitygroup.yml
+  when: state == 'absent'

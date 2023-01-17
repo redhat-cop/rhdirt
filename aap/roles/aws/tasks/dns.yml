@@ -1,0 +1,33 @@
+---
+- name: Get information about an instance
+  amazon.aws.rds_instance_info:
+    region: "{{ aws_region }}"
+  register: new_database_info
+
+- name: add/remove dns record 
+  amazon.aws.route53:
+    state: "{{ state }}"
+    zone: "{{ zone }}"
+    record: "{{ item.db_instance_identifier }}.{{ zone }}"
+    type: CNAME
+    ttl: 7200
+    value: "{{ dns_name | ternary(dns_name,omit) }}" 
+    wait: true
+  vars:
+    dns_name: "{{ new_database_info.instances | selectattr('db_instance_identifier', 'equalto', item.db_instance_identifier) | map(attribute='endpoint.address') | join }}"
+  loop: "{{ db_instances }}"
+
+- name: add/remove dns record 
+  amazon.aws.route53:
+    state: "{{ state }}"
+    zone: "{{ zone }}"
+    record: "{{ item.name }}.{{ zone }}"
+    type: A
+    ttl: 7200
+    value: "{{ extract_public_ip | ternary(extract_public_ip,omit) }}" 
+    wait: true
+  vars:
+    extract_public_ip: "{{ comp.results | json_query(query) | flatten | join  }}"
+    query: "[].instances[?tags.Name=='{{ item.name }}'].public_ip_address"
+    existing_ip: "{{ lookup('dig', item.name + '.' + zone) }}"
+  loop: "{{ instances }}"

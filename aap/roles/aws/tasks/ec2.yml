@@ -1,0 +1,36 @@
+---
+- name: Create Key for EC2
+  amazon.aws.ec2_key:
+    region: "{{ aws_region }}"
+    name: "{{ env }}_key"
+    key_material: "{{ key_material }}"
+    state: "{{ state }}"
+
+- amazon.aws.ec2_security_group_info:
+    region: "{{ aws_region }}"
+    filters:
+      group-name: "{{ security_groups | map(attribute='name') }}"
+  register: provisioned_security_groups
+
+- name: Create/Destroy instance with EBS volume
+  amazon.aws.ec2_instance:
+    name: "{{ item.name }}"
+    state: "{{ instance_state }}"
+    image:
+      id: "{{ item.image_id }}"
+    vpc_subnet_id:  "{{ item.vpc_subnet_id }}"
+    instance_type: "{{ item.instance_type }}"
+    key_name: "{{ env }}_key"
+    user_data: "{{ item.user_data | default(omit) }}" 
+    security_group: "{{ item.security_group }}"
+    region: "{{ aws_region }}"
+    tags: "{{ item.tags }}"
+    volumes:
+      - device_name: /dev/sda1
+        ebs:
+          volume_size: "{{ item.volume_size }}"
+          delete_on_termination: true 
+  register: comp
+  vars:
+    instance_state: "{{ (state=='present') | ternary('running', 'absent') }}"
+  loop: "{{ instances }}"

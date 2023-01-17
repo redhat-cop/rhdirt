@@ -1,0 +1,16 @@
+---
+- name: Create RDS database
+  amazon.aws.rds_instance:
+    region: "{{ aws_region }}"
+    state: "{{ state }}"
+    engine: postgres
+    db_instance_identifier: "{{ item.db_instance_identifier }}"
+    instance_type: "{{ item.instance_type }}"
+    password: "{{ item.password }}"
+    username: "{{ item.username }}"
+    allocated_storage: "{{ item.allocated_storage }}"
+    vpc_security_group_ids: "{{ sec_group_id }}"
+    skip_final_snapshot: true
+  vars:
+    sec_group_id: "{{ provisioned_security_groups.security_groups | selectattr('group_name', 'equalto', item.vpc_security_group_name) | map(attribute='group_id') }}"
+  loop: "{{ db_instances }}"
