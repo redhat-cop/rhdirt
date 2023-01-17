@@ -3,13 +3,32 @@
   connection: local
   gather_facts: false
   
+  pre_tasks:
+  - name: Refresh inventory to ensure new instances exist in inventory
+    ansible.builtin.meta: refresh_inventory
+
+  - debug:
+      var: state
+
   roles:
   - aws
+  - role: database
+
+  post_tasks:
+  - debug:
+      var: state
 
 - hosts: tag_Environment_viper:&platform_Red_Hat_Enterprise_Linux
 
+  pre_tasks:
+  - name: Refresh inventory to ensure new instances exist in inventory
+    ansible.builtin.meta: refresh_inventory
+
+  - debug:
+      var: state
+
   roles:
-  - update
+  - role: update
 
 - hosts: installationserver
   vars:
@@ -30,6 +49,7 @@
     - content: "{{ isrgx1_root_cert }}"
       mode: '0644'
       dest: isrgx1_root_cert.crt
+    when: state == 'present'
   - name: Create a keystore for the given certificate/private key pair (with files on controller)
     community.general.java_keystore:
       name: aap.dragonslair.dev
@@ -37,7 +57,11 @@
       private_key: "{{ lookup('file', work_dir + '/aap.dragonslair.dev.pem') }}"
       password: "{{ jks_password }}"
       dest: "{{ work_dir }}/aap.dragonslair.dev.jks"
+    when: state == 'present'
   roles:
-  - { role: hfenner.aap_utilities.aap_setup_download }
-  - { role: hfenner.aap_utilities.aap_setup_prepare }
-  - { role: hfenner.aap_utilities.aap_setup_install }
+  - role: hfenner.aap_utilities.aap_setup_download
+    when: state == 'present'
+  - role: hfenner.aap_utilities.aap_setup_prepare
+    when: state == 'present'
+  - role: hfenner.aap_utilities.aap_setup_install
+    when: state == 'present'

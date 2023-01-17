@@ -11,6 +11,18 @@
     allocated_storage: "{{ item.allocated_storage }}"
     vpc_security_group_ids: "{{ sec_group_id }}"
     skip_final_snapshot: true
+  register: rds_creation
   vars:
     sec_group_id: "{{ provisioned_security_groups.security_groups | selectattr('group_name', 'equalto', item.vpc_security_group_name) | map(attribute='group_id') }}"
   loop: "{{ db_instances }}"
+  async: 1000
+  poll: 0
+
+- name: Check on RDS instance creation
+  async_status: 
+    jid: "{{ item.ansible_job_id }}"
+  register: rds_creation_result
+  until: rds_creation_result.finished
+  loop: "{{ rds_creation.results }}"
+  retries: 100
+  delay: 10

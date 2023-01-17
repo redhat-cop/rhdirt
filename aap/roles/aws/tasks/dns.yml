@@ -4,7 +4,7 @@
     region: "{{ aws_region }}"
   register: new_database_info
 
-- name: add/remove dns record 
+- name: Add or Remove RDS DNS Record
   amazon.aws.route53:
     state: "{{ state }}"
     zone: "{{ zone }}"
@@ -13,11 +13,39 @@
     ttl: 7200
     value: "{{ dns_name | ternary(dns_name,omit) }}" 
     wait: true
+  register: rds_dns_creation
   vars:
     dns_name: "{{ new_database_info.instances | selectattr('db_instance_identifier', 'equalto', item.db_instance_identifier) | map(attribute='endpoint.address') | join }}"
   loop: "{{ db_instances }}"
+  async: 600
+  poll: 0
 
-- name: add/remove dns record 
+- name: Check on RDS DNS creation
+  async_status: 
+    jid: "{{ item.ansible_job_id }}"
+  register: rds_dns_creation_result
+  until: rds_dns_creation_result.finished
+  loop: "{{ rds_dns_creation.results }}"
+  retries: 60
+  delay: 10
+
+- name: Gather information about all instances
+  amazon.aws.ec2_instance_info:
+    region: "{{ aws_region }}"
+    filters:
+      "tag:Environment": "{{ env }}"
+  register: new_ec2_info
+
+- debug:
+    var: extract_public_ip
+  loop: "{{ instances }}"
+  vars:
+    extract_public_ip: "{{ new_ec2_info.instances | selectattr('tags.Name', 'equalto', item.name) | map(attribute='public_ip_address') | join  }}"
+    query: "[].instances[?tags.Name=='{{ item.name }}'].public_ip_address"
+    existing_ip: "{{ lookup('dig', item.name + '.' + zone) }}"
+
+
+- name: Add/Remove EC2 DNS Record
   amazon.aws.route53:
     state: "{{ state }}"
     zone: "{{ zone }}"
@@ -26,8 +54,20 @@
     ttl: 7200
     value: "{{ extract_public_ip | ternary(extract_public_ip,omit) }}" 
     wait: true
+  register: ec2_dns_creation
   vars:
-    extract_public_ip: "{{ comp.results | json_query(query) | flatten | join  }}"
+    extract_public_ip: "{{ new_ec2_info.instances | selectattr('tags.Name', 'equalto', item.name) | map(attribute='public_ip_address') | join  }}"
     query: "[].instances[?tags.Name=='{{ item.name }}'].public_ip_address"
     existing_ip: "{{ lookup('dig', item.name + '.' + zone) }}"
   loop: "{{ instances }}"
+  async: 600
+  poll: 0
+    
+- name: Check on EC2 DNS creation
+  async_status: 
+    jid: "{{ item.ansible_job_id }}"
+  register: ec2_dns_creation_result
+  until: ec2_dns_creation_result.finished
+  loop: "{{ ec2_dns_creation.results }}"
+  retries: 60
+  delay: 10

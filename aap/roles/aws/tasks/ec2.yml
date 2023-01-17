@@ -34,3 +34,14 @@
   vars:
     instance_state: "{{ (state=='present') | ternary('running', 'absent') }}"
   loop: "{{ instances }}"
+  async: 600
+  poll: 0
+
+- name: Check on EC2 instance creation
+  async_status: 
+    jid: "{{ item.ansible_job_id }}"
+  register: ec2_creation_result
+  until: ec2_creation_result.finished
+  loop: "{{ comp.results }}"
+  retries: 60
+  delay: 10

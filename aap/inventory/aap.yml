@@ -11,7 +11,7 @@ all:
         aap_setup_down_dest_dir: "{{ playbook_dir }}"
         aap_setup_down_type: setup 
         aap_setup_rhel_version: 8
-        aap_setup_prep_working_dir: "{{ playbook_dir }}" 
+        aap_setup_prep_working_dir: /tmp
         controller_hostname: aac.dragonslair.dev 
         controller_username: admin
         controller_password: "{{ aap_admin_password }}"
@@ -60,12 +60,12 @@ all:
             automationcatalog_pg_password: "{{ db_instances[0].password }}"
             automationcatalog_pg_sslmode: prefer
             sso_console_admin_password: "{{ aap_admin_password }}"
-            sso_custom_keystore_file: "{{ playbook_dir }}/aap.dragonslair.dev.jks"
+            sso_custom_keystore_file: "{{ work_dir }}/aap.dragonslair.dev.jks"
             sso_keystore_password: "{{ jks_password }}"
-            custom_ca_cert: "{{ playbook_dir }}/isrgx1_root_cert.crt"
-            web_server_ssl_key: "{{ playbook_dir }}/aap.dragonslair.dev.pem"
-            web_server_ssl_cert: "{{ playbook_dir }}/aap.dragonslair.dev.crt"
-            automationhub_ssl_key: "{{ playbook_dir }}/aap.dragonslair.dev.pem"
-            automationhub_ssl_cert: "{{ playbook_dir }}/aap.dragonslair.dev.crt"
-            automationcatalog_ssl_key: "{{ playbook_dir }}/aap.dragonslair.dev.pem"
-            automationcatalog_ssl_cert: "{{ playbook_dir }}/aap.dragonslair.dev.crt"
+            custom_ca_cert: "{{ work_dir }}/isrgx1_root_cert.crt"
+            web_server_ssl_key: "{{ work_dir }}/aap.dragonslair.dev.pem"
+            web_server_ssl_cert: "{{ work_dir }}/aap.dragonslair.dev.crt"
+            automationhub_ssl_key: "{{ work_dir }}/aap.dragonslair.dev.pem"
+            automationhub_ssl_cert: "{{ work_dir }}/aap.dragonslair.dev.crt"
+            automationcatalog_ssl_key: "{{ work_dir }}/aap.dragonslair.dev.pem"
+            automationcatalog_ssl_cert: "{{ work_dir }}/aap.dragonslair.dev.crt"
