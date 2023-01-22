@@ -37,7 +37,7 @@
   register: new_ec2_info
 
 - debug:
-    var: extract_public_ip
+    msg: "{{ new_ec2_info.instances[0] }}"
   loop: "{{ instances }}"
   vars:
     extract_public_ip: "{{ new_ec2_info.instances | selectattr('tags.Name', 'equalto', item.name) | map(attribute='public_ip_address') | join  }}"
