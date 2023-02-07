@@ -1,7 +1,7 @@
 eval $(op signin)
 export AWS_ACCESS_KEY_ID=$(op item get bvpntj5tevsm32d6kn4kxxb62a --fields AWS_ACCESS_KEY_ID)
 export AWS_SECRET_ACCESS_KEY=$(op item get bvpntj5tevsm32d6kn4kxxb62a --fields AWS_SECRET_ACCESS_KEY)
-export AWS_REGION=us-east-2
+export AWS_REGION=us-east-1
 export GITHUB_OAUTH_TOKEN=$(op item get bvpntj5tevsm32d6kn4kxxb62a --fields GITHUB_OAUTH_TOKEN)
 export QUAY_USERNAME=$(op item get bvpntj5tevsm32d6kn4kxxb62a --fields QUAY_USERNAME)
 export QUAY_PASSWORD=$(op item get bvpntj5tevsm32d6kn4kxxb62a --fields QUAY_PASSWORD)

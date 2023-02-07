@@ -5,7 +5,7 @@ all:
     zone: dragonslair.dev
     aws_access_key_id: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
     aws_secret_access_key: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
-    aws_region: us-east-2
+    aws_region: us-east-1
     secrets: "{{ lookup('amazon.aws.aws_ssm','/' + env,region=aws_region,aws_access_key=aws_access_key_id,aws_secret_key=aws_secret_access_key,shortnames=true,bypath=true,recursive=true) }}"
     aap_platform_key: "{{ secrets.aap_platform_key }}"
     aap_platform_cert: "{{ secrets.aap_platform_cert }}"
