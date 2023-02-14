@@ -102,16 +102,57 @@
     loop: "{{ seed }}"
     no_log: "{{ nolog }}"
 
+  - name: Login to Red Hat APIs
+    ansible.builtin.uri:
+      url: "{{ aap_setup_down_token_url }}"
+      method: POST
+      body_format: form-urlencoded
+      body:
+        grant_type: refresh_token
+        client_id: rhsm-api
+        refresh_token: "{{ aap_setup_down_offline_token }}"
+    register: __aap_setup_down_login
+
+  - name: Collecting the available installers
+    ansible.builtin.uri:
+      url: "{{ aap_setup_down_images_url }}"
+      method: GET
+      return_content: true
+      headers:
+        Authorization: "Bearer {{ __aap_setup_down_login.json.access_token }}"
+    register: __aap_setup_down_output
+
+  - name: Simplify the list of possible downloads
+    ansible.builtin.set_fact:
+      __aap_setup_down_images: "{{ __aap_setup_down_output.json.body | sort(attribute='datePublished', reverse=True) }}"
+
+  - name: Downloading the latest installer of type {{ aap_setup_down_type }}
+    ansible.builtin.get_url:
+      url: "{{ item.downloadHref }}"
+      dest: "{{ aap_setup_down_dest_dir }}/{{ item.filename }}"
+      mode: 0644
+      headers:
+        Authorization: "Bearer {{ __aap_setup_down_login.json.access_token }}"
+    loop: "{{ __aap_setup_down_images }}"
+    when: ((aap_setup_down_type | string) + '-' + (aap_setup_down_version | string)) in item.filename
+    register: __aap_setup_down_downloads
+
+  - name: Extract the name of the downloaded installer to aap_setup_down_installer_file
+    ansible.builtin.set_fact:
+      aap_setup_down_installer_file: "{{ (__aap_setup_down_downloads.results | selectattr('dest', 'defined') | map(attribute='dest') | list)[0] }}"
+
   - name: Create an empty bucket
     amazon.aws.s3_bucket:
       name: "{{ env }}-artifacts"
+      region: "{{ aws_region }}" 
       state: "{{ state }}"
       force: true
 
   - name: Upload ansible bundle
     amazon.aws.s3_object:
       bucket: "{{ env }}-artifacts"
-      object: ansible-automation-platform-setup-2.2.0-8.tar.gz 
-      src: artifacts/ansible-automation-platform-setup-2.2.0-8.tar.gz
+      region: "{{ aws_region }}" 
+      object: "ansible-automation-platform-setup-{{ aap_setup_down_type }}.tar.gz"
+      src: "{{ aap_setup_down_installer_file }}"
       mode: put
     when: state != "absent"
