@@ -143,14 +143,14 @@
 
   - name: Create an empty bucket
     amazon.aws.s3_bucket:
-      name: "{{ env }}-artifacts"
+      name: "{{ env_bucket }}"
       region: "{{ aws_region }}" 
       state: "{{ state }}"
       force: true
 
   - name: Upload ansible bundle
     amazon.aws.s3_object:
-      bucket: "{{ env }}-artifacts"
+      bucket: "{{ env_bucket }}"
       region: "{{ aws_region }}" 
       object: "ansible-automation-platform-setup-{{ aap_setup_down_type }}.tar.gz"
       src: "{{ aap_setup_down_installer_file }}"
