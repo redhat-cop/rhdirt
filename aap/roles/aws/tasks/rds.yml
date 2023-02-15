@@ -1,4 +1,18 @@
 ---
+- amazon.aws.ec2_security_group_info:
+    region: "{{ aws_region }}"
+    filters:
+      group-name: "{{ security_groups | map(attribute='name') }}"
+  register: provisioned_security_groups_results
+
+- set_fact:
+    prov_sec_group: "{{ provisioned_security_groups_results.security_groups }}" 
+    cacheable: yes
+
+- set_fact:
+    security_group_ids: "{{ dict(prov_sec_group | map(attribute='group_name') | zip(prov_sec_group | map(attribute='group_id'))) }}"
+    cacheable: yes
+
 - name: Create RDS database
   amazon.aws.rds_instance:
     region: "{{ aws_region }}"
@@ -9,11 +23,13 @@
     password: "{{ item.password }}"
     username: "{{ item.username }}"
     allocated_storage: "{{ item.allocated_storage }}"
-    vpc_security_group_ids: "{{ sec_group_id }}"
+    db_subnet_group_name: db_subnet_group
+    vpc_security_group_ids: "{{ security_group_ids[item.security_group] }}"
     skip_final_snapshot: true
+    tags:
+      Name: "{{ item.db_instance_identifier }}"
+      Env: "{{ env }}"
   register: rds_creation
-  vars:
-    sec_group_id: "{{ provisioned_security_groups.security_groups | selectattr('group_name', 'equalto', item.vpc_security_group_name) | map(attribute='group_id') }}"
   loop: "{{ db_instances }}"
   async: 1000
   poll: 0

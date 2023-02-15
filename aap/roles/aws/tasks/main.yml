@@ -1,22 +1,32 @@
 ---
-- name: Create security groups
+- name: Create
   ansible.builtin.include_tasks:
-    file: securitygroup.yml
+    file: "{{ task_list_loop }}"
   when: state == 'present'
+  loop:
+  - vpc.yml
+  - subnet.yml
+  - igw.yml
+  - securitygroup.yml
+  - ec2.yml
+  - rds_subnet.yml
+  - rds.yml
+  - dns.yml
+  loop_control:
+    loop_var: task_list_loop
 
-- name: Create EC2 instances
+- name: Delete
   ansible.builtin.include_tasks:
-    file: ec2.yml
-
-- name: Create RDS instances
-  ansible.builtin.include_tasks:
-    file: rds.yml
-
-- name: Create DNS Records
-  ansible.builtin.include_tasks:
-    file: dns.yml
-
-- name: Create security groups
-  ansible.builtin.include_tasks:
-    file: securitygroup.yml
+    file: "{{ task_list_loop }}"
   when: state == 'absent'
+  loop:
+    #- dns.yml
+  - rds.yml
+  - rds_subnet.yml
+  - ec2.yml
+  - securitygroup.yml
+  - igw.yml
+  - subnet.yml
+  - vpc.yml
+  loop_control:
+    loop_var: task_list_loop

@@ -2,7 +2,24 @@
 - name: Get information about an instance
   amazon.aws.rds_instance_info:
     region: "{{ aws_region }}"
-  register: new_database_info
+  register: rds_results
+
+- name: Gather information about all instances
+  amazon.aws.ec2_instance_info:
+    region: "{{ aws_region }}"
+    filters:
+      "tag:Env": "{{ env }}"
+  register: ec2_results
+
+- set_fact:
+    provisioned_rds: "{{ rds_results.instances }}"
+    provisioned_ec2: "{{ ec2_results.instances }}"
+    cacheable: true
+
+- set_fact:
+    rds_ips: null
+    ec2_ips: null
+    cacheable: true
 
 - name: Add or Remove RDS DNS Record
   amazon.aws.route53:
@@ -35,15 +52,6 @@
     filters:
       "tag:Environment": "{{ env }}"
   register: new_ec2_info
-
-- debug:
-    msg: "{{ new_ec2_info.instances[0] }}"
-  loop: "{{ instances }}"
-  vars:
-    extract_public_ip: "{{ new_ec2_info.instances | selectattr('tags.Name', 'equalto', item.name) | map(attribute='public_ip_address') | join  }}"
-    query: "[].instances[?tags.Name=='{{ item.name }}'].public_ip_address"
-    existing_ip: "{{ lookup('dig', item.name + '.' + zone) }}"
-
 
 - name: Add/Remove EC2 DNS Record
   amazon.aws.route53:
