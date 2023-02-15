@@ -1,0 +1,25 @@
+---
+- amazon.aws.ec2_vpc_subnet_info:
+    region: "{{ aws_region }}"
+    filters:
+      "tag:Env": "{{ env }}"
+  register: provisioned_subnets_results
+
+- set_fact:
+    prov_subnets: "{{ provisioned_subnets_results.subnets }}"
+    cacheable: yes
+
+- set_fact:
+    subnet_ids: "{{ dict(prov_subnets | map(attribute='tags.Name') | zip(prov_subnets | map(attribute='subnet_id'))) }}"
+    cacheable: yes
+
+- name: Add DB Subnet Group
+  amazon.aws.rds_subnet_group:
+    region: "{{ aws_region }}"
+    state: "{{ state }}"
+    name: db_subnet_group
+    description: Database Subnet Group
+    subnets:
+    - "{{ subnet_ids[item.vpc_subnet] }}"
+    - "{{ subnet_ids['public-b'] }}"
+  loop: "{{ db_instances }}"

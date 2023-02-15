@@ -1,0 +1,11 @@
+---
+- name: create a VPC with dedicated tenancy and a couple of tags
+  amazon.aws.ec2_vpc_net:
+    name: "{{ env_vpc }}"
+    cidr_block: "{{ vpc_cidr_block }}"
+    region: "{{ aws_region }}"
+    tenancy: default
+    state: "{{ state }}"
+    tags:
+      Name: "{{ env_vpc }}"
+      Env: "{{ env }}"
