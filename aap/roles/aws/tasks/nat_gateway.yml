@@ -1,0 +1,50 @@
+---
+- amazon.aws.ec2_vpc_subnet_info:
+    region: "{{ aws_region }}"
+    filters:
+      "tag:Env": "{{ env }}"
+  register: provisioned_subnets_results
+
+- set_fact:
+    prov_subnets: "{{ provisioned_subnets_results.subnets }}"
+    cacheable: yes
+
+- set_fact:
+    subnet_ids: "{{ dict(prov_subnets | map(attribute='tags.Name') | zip(prov_subnets | map(attribute='subnet_id'))) }}"
+    cacheable: yes
+
+- name: create NAT gateway
+  ec2_vpc_nat_gateway:
+    subnet_id: "{{ subnet_ids[nat_gateway_subnet] }}"
+    region: "{{ aws_region }}"
+    state: "{{ state }}"
+    wait: yes
+    if_exist_do_not_create: true
+    tags:
+      Name: "{{ nat_gateway_subnet }}"
+      Env: "{{ env }}"
+  when: state == 'present'
+
+- name: Get all nat gateways with specific filters
+  amazon.aws.ec2_vpc_nat_gateway_info:
+    region: "{{ aws_region }}"
+    filters:
+      "tag:Env": "{{ env }}"
+  register: provisioned_nat_gateway_results
+
+- set_fact:
+    prov_nat_gw: "{{ provisioned_nat_gateway_results.result | map(attribute='nat_gateway_id') | join }}"
+    cacheable: yes
+
+- name: Delete NAT gateway
+  ec2_vpc_nat_gateway:
+    nat_gateway_id: "{{ prov_nat_gw }}" 
+    subnet_id: "{{ subnet_ids[nat_gateway_subnet] }}"
+    region: "{{ aws_region }}"
+    state: "{{ state }}"
+    wait: yes
+    if_exist_do_not_create: true
+    tags:
+      Name: "{{ nat_gateway_subnet }}"
+      Env: "{{ env }}"
+  when: state == 'absent'

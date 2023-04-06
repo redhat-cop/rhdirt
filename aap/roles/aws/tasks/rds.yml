@@ -33,6 +33,7 @@
   loop: "{{ db_instances }}"
   async: 1000
   poll: 0
+  when: state == 'present'
 
 - name: Check on RDS instance creation
   async_status: 
@@ -42,3 +43,17 @@
   loop: "{{ rds_creation.results }}"
   retries: 100
   delay: 10
+  when: state == 'present'
+
+- name: Create RDS database
+  amazon.aws.rds_instance:
+    region: "{{ aws_region }}"
+    state: "{{ state }}"
+    db_instance_identifier: "{{ item.db_instance_identifier }}"
+    skip_final_snapshot: true
+    tags:
+      Name: "{{ item.db_instance_identifier }}"
+      Env: "{{ env }}"
+  register: rds_creation
+  when: state == 'absent'
+  loop: "{{ db_instances }}"

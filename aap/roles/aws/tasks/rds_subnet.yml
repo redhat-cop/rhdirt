@@ -23,3 +23,13 @@
     - "{{ subnet_ids[item.vpc_subnet] }}"
     - "{{ subnet_ids['public-b'] }}"
   loop: "{{ db_instances }}"
+  when: state == 'present'
+
+- name: Add DB Subnet Group
+  amazon.aws.rds_subnet_group:
+    region: "{{ aws_region }}"
+    state: "{{ state }}"
+    name: db_subnet_group
+    description: Database Subnet Group
+  loop: "{{ db_instances }}"
+  when: state == 'absent'

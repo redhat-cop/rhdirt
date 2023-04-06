@@ -54,7 +54,7 @@
 - name: Create/Destroy instance with EBS volume
   amazon.aws.ec2_instance:
     name: "{{ item.name }}"
-    state: "{{ instance_state }}"
+    state: running
     image:
       id: "{{ lookup('ansible.builtin.vars', item.image_name) }}"
     vpc_subnet_id:  "{{ subnet_ids[item.vpc_subnet] }}"
@@ -74,6 +74,7 @@
           volume_size: "{{ item.volume_size }}"
           delete_on_termination: true 
   register: comp
+  when: state == 'present'
   vars:
     instance_state: "{{ (state=='present') | ternary('running', 'absent') }}"
   loop: "{{ instances }}"
@@ -88,3 +89,14 @@
 #  loop: "{{ comp.results }}"
 #  retries: 60
 #  delay: 10
+
+- name: Destroy instance with EBS volume
+  amazon.aws.ec2_instance:
+    region: "{{ aws_region }}"
+    name: "{{ item.name }}"
+    state: absent
+  register: comp
+  vars:
+    instance_state: "{{ (state=='present') | ternary('running', 'absent') }}"
+  loop: "{{ instances }}"
+  when: state == 'absent'

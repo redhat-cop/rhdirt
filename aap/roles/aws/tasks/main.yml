@@ -7,6 +7,8 @@
   - vpc.yml
   - subnet.yml
   - igw.yml
+  - nat_gateway.yml
+  - route.yml
   - securitygroup.yml
   - ec2.yml
   - rds_subnet.yml
@@ -20,11 +22,13 @@
     file: "{{ task_list_loop }}"
   when: state == 'absent'
   loop:
-    #- dns.yml
+  - dns.yml
   - rds.yml
   - rds_subnet.yml
   - ec2.yml
   - securitygroup.yml
+  - route.yml
+  - nat_gateway.yml
   - igw.yml
   - subnet.yml
   - vpc.yml

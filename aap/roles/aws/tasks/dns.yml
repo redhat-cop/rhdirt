@@ -15,11 +15,13 @@
     provisioned_rds: "{{ rds_results.instances }}"
     provisioned_ec2: "{{ ec2_results.instances }}"
     cacheable: true
+  when: state == "present"
 
 - set_fact:
-    rds_ips: null
-    ec2_ips: null
+    rds_addresses: "{{ dict(provisioned_rds | map(attribute='tags.Name') | zip(provisioned_rds | map(attribute='endpoint.address')))  }}"
+    ec2_ips: "{{ dict(provisioned_ec2 | map(attribute='tags.Name') | zip(provisioned_ec2 | map(attribute='public_ip_address')))  }}"
     cacheable: true
+  when: state == "present"
 
 - name: Add or Remove RDS DNS Record
   amazon.aws.route53:
@@ -28,11 +30,10 @@
     record: "{{ item.db_instance_identifier }}.{{ zone }}"
     type: CNAME
     ttl: 7200
-    value: "{{ dns_name | ternary(dns_name,omit) }}" 
+    value: "{{ rds_addresses[item.db_instance_identifier] | ternary(rds_addresses[item.db_instance_identifier],omit) }}" 
     wait: true
   register: rds_dns_creation
-  vars:
-    dns_name: "{{ new_database_info.instances | selectattr('db_instance_identifier', 'equalto', item.db_instance_identifier) | map(attribute='endpoint.address') | join }}"
+  when: state == "present"
   loop: "{{ db_instances }}"
   async: 600
   poll: 0
@@ -41,17 +42,11 @@
   async_status: 
     jid: "{{ item.ansible_job_id }}"
   register: rds_dns_creation_result
+  when: state == "present"
   until: rds_dns_creation_result.finished
   loop: "{{ rds_dns_creation.results }}"
   retries: 60
   delay: 10
-
-- name: Gather information about all instances
-  amazon.aws.ec2_instance_info:
-    region: "{{ aws_region }}"
-    filters:
-      "tag:Environment": "{{ env }}"
-  register: new_ec2_info
 
 - name: Add/Remove EC2 DNS Record
   amazon.aws.route53:
@@ -60,13 +55,10 @@
     record: "{{ item.name }}.{{ zone }}"
     type: A
     ttl: 7200
-    value: "{{ extract_public_ip | ternary(extract_public_ip,omit) }}" 
+    value: "{{ ec2_ips[item.name] | ternary(ec2_ips[item.name],omit) }}" 
     wait: true
   register: ec2_dns_creation
-  vars:
-    extract_public_ip: "{{ new_ec2_info.instances | selectattr('tags.Name', 'equalto', item.name) | map(attribute='public_ip_address') | join  }}"
-    query: "[].instances[?tags.Name=='{{ item.name }}'].public_ip_address"
-    existing_ip: "{{ lookup('dig', item.name + '.' + zone) }}"
+  when: state == "present"
   loop: "{{ instances }}"
   async: 600
   poll: 0
@@ -75,7 +67,31 @@
   async_status: 
     jid: "{{ item.ansible_job_id }}"
   register: ec2_dns_creation_result
+  when: state == "present"
   until: ec2_dns_creation_result.finished
   loop: "{{ ec2_dns_creation.results }}"
   retries: 60
   delay: 10
+
+- name: Remove EC2 DNS Record
+  amazon.aws.route53:
+    state: "{{ state }}"
+    zone: "{{ zone }}"
+    record: "{{ item.name }}.{{ zone }}"
+    type: A
+    ttl: 7200
+    value: "{{ ec2_ips[item.name] | ternary(ec2_ips[item.name],omit) }}" 
+    wait: true
+  loop: "{{ instances }}"
+  when: state == "absent"
+
+- name: Remove RDS DNS Record
+  amazon.aws.route53:
+    state: "{{ state }}"
+    zone: "{{ zone }}"
+    record: "{{ item.db_instance_identifier }}.{{ zone }}"
+    type: CNAME
+    ttl: 7200
+    wait: true
+  when: state == "absent"
+  loop: "{{ db_instances }}"
