@@ -26,21 +26,27 @@ all:
       private-a:
         cidr: 10.10.1.0/24
         az: "{{ aws_region }}a"
+        internet_routable: false
       public-a:
         cidr: 10.10.2.0/24
         az: "{{ aws_region }}a"
+        internet_routable: true
       private-b:
         cidr: 10.10.3.0/24
         az: "{{ aws_region }}b"
+        internet_routable: false
       public-b:
         cidr: 10.10.4.0/24
         az: "{{ aws_region }}b"
+        internet_routable: true
       private-c:
         cidr: 10.10.5.0/24
         az: "{{ aws_region }}c"
+        internet_routable: false
       public-c:
         cidr: 10.10.6.0/24
         az: "{{ aws_region }}c"
+        internet_routable: true
     security_groups:
     - name: rhel
       description: Red Hat Firewall Ports
