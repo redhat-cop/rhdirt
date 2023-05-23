@@ -1,0 +1,2 @@
+- name: RedHatOfficial.rhel8_stig 
+  src: https://github.com/RedHatOfficial/ansible-role-rhel8-stig
