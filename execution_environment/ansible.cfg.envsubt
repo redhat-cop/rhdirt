@@ -3,7 +3,6 @@ server_list = automation_hub,community
 
 [galaxy_server.automation_hub]
 url=${HUB_URL}
-auth_url=${AUTH_URL}
 token=${HUB_TOKEN}
 
 [galaxy_server.community]

@@ -12,18 +12,22 @@ build_arg_defaults:
 dependencies:
   galaxy: requirements.yml
   python: requirements.txt
-  system: bindep.txt
 
 ansible_config: 'ansible.cfg'
 
 additional_build_steps:
   #Just keeping this here as an example; we can do most of this pre or post
   prepend: |
-    RUN microdnf install --enablerepo ansible-automation-platform-2.2-for-rhel-8-x86_64-rpms ansible-lint
+    RUN microdnf install --enablerepo  ansible-automation-platform-2.3-for-rhel-9-x86_64-rpms ansible-lint
   append: |
     RUN pip3 install --upgrade pip setuptools; \
         microdnf install -y yum-utils; \
         yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo; \
-        microdnf install -y terraform packer vault wget
+        microdnf install -y terraform packer vault wget libsnl iputils unzip ansible-core rsync git java-11-openjdk-headless; \
+        microdnf clean all; \
+        rm -rf /var/cache/{dnf,yum}; \
+        rm -rf /var/lib/dnf/history.*; \
+        rm -rf /var/log/{dnf.*,hawkey.log}; \
+        rm -rf /tmp/venv
     ENV PATH "/usr/bin:$PATH"
 ...
