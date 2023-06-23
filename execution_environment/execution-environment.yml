@@ -18,7 +18,7 @@ ansible_config: 'ansible.cfg'
 additional_build_steps:
   #Just keeping this here as an example; we can do most of this pre or post
   prepend: |
-    RUN microdnf install --enablerepo  ansible-automation-platform-2.3-for-rhel-9-x86_64-rpms ansible-lint
+    RUN microdnf install --enablerepo  ansible-automation-platform-2.3-for-rhel-8-x86_64-rpms ansible-lint
   append: |
     RUN pip3 install --upgrade pip setuptools; \
         microdnf install -y yum-utils; \
