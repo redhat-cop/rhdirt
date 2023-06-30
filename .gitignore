@@ -4,3 +4,4 @@ viper.yml
 */context/*
 execution_environment/ansible.cfg
 */artifacts/*
+.DS_Store
