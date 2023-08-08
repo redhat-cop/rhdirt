@@ -1,0 +1,14 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: False
+
+  tasks:
+  - name: Add project
+    ansible.controller.project:
+      name: "RHEL 8 STIG"
+      description: "RHEL 8 STIG Project"
+      organization: "Disconnected"
+      state: "absent"
+      scm_type: git
+      scm_url: "https://github.com/hfenner/rhdirt.git"
