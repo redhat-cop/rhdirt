@@ -1,0 +1,14 @@
+---
+ansible-navigator:
+  app: run
+  execution-environment:
+    container-engine: podman
+    image: localhost/ansible-execution-env:latest
+    pull:
+      policy: never
+  logging:
+    file: /dev/null
+    level: critical
+  mode: stdout
+  playbook-artifact:
+    enable: false
