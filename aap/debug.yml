@@ -1,0 +1,6 @@
+---
+- hosts: localhost
+  
+  tasks:
+  - debug:
+      msg: "I'm a job template owned by {{ aap_org }}."
