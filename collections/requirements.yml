@@ -1,6 +1,7 @@
 ---
 collections:
 - name: community.general
+- name: infra.ee_utilities
 - name: hfenner.aap_utilities
   source: https://github.com/hfenner/aap_utilities.git
   version: devel
