@@ -1,6 +1,6 @@
 ---
 - name: Playbook to create custom EE
-  hosts: 18.252.28.45
+  hosts: bastion
   remote_user: ec2-user
   gather_facts: false
   collections:
