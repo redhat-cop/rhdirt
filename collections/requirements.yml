@@ -1,6 +1,7 @@
 ---
 collections:
 - name: community.general
+- name: community.crypto
 - name: containers.podman
 - name: servicenow.itsm
 - name: infra.ee_utilities
