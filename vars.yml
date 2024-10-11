@@ -1,6 +1,5 @@
 ---
-- hosts: localhost
-  gather_facts: false
+- hosts: all
 
   tasks:
   - name: print all variables
