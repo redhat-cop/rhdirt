@@ -6,6 +6,7 @@ collections:
 - name: containers.podman
 - name: servicenow.itsm
 - name: infra.ee_utilities
+- name: redhat.openshift_virtualization
 - name: hfenner.aap_utilities
   source: https://github.com/hfenner/aap_utilities.git
   version: devel
