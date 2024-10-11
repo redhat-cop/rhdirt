@@ -3,7 +3,7 @@
 
   tasks:
   - name: Show agent
-    command: ls -l /runner/artifacts
+    command: tree /runner/artifacts
     delegate_to: localhost
     
   - name: print all variables
