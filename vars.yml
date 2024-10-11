@@ -2,6 +2,10 @@
 - hosts: all
 
   tasks:
+  - name: Show agent
+    command: ssh-add -L
+    delegate_to: localhost
+    
   - name: print all variables
     debug:
       var=vars
