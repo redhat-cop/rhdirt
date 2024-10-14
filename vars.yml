@@ -3,7 +3,7 @@
 
   tasks:
   - name: Show agent
-    command: "ls -ltr /runner/artifacts/{{ awx_job_id }}"
+    command: "ls -ltr /runner/artifacts/{{ awx_job_id }}/ssh_key_data"
     delegate_to: localhost
     
   - name: print all variables
