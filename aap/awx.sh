@@ -1,3 +1,8 @@
+#Important Environment Variables
+export CONTROLLER_HOST=
+export CONTROLLER_VERIFY_SSL=
+export CONTROLLER_OAUTH_TOKEN=
+
 #Find the project ID by name then update project while following progress
 awx project update $(awx project list --name viper_rhdirt | jq '.results[0].id') --monitor -f human
 #Find the inventory source ID by name then update inventory source while following progress

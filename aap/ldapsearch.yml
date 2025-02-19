@@ -1,0 +1,6 @@
+---
+- hosts: localhost
+
+  tasks:
+  - name: Search for an LDAP user
+    command: "ldapsearch"

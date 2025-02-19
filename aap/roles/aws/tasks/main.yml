@@ -1,0 +1,36 @@
+---
+- name: Create
+  ansible.builtin.include_tasks:
+    file: "{{ task_list_loop }}"
+  when: state == 'present'
+  loop:
+  - vpc.yml
+  - subnet.yml
+  - igw.yml
+  - nat_gateway.yml
+  - route.yml
+  - securitygroup.yml
+  - ec2.yml
+  - rds_subnet.yml
+  - rds.yml
+  - dns.yml
+  loop_control:
+    loop_var: task_list_loop
+
+- name: Delete
+  ansible.builtin.include_tasks:
+    file: "{{ task_list_loop }}"
+  when: state == 'absent'
+  loop:
+  - dns.yml
+  - rds.yml
+  - rds_subnet.yml
+  - ec2.yml
+  - securitygroup.yml
+  - route.yml
+  - nat_gateway.yml
+  - igw.yml
+  - subnet.yml
+  - vpc.yml
+  loop_control:
+    loop_var: task_list_loop

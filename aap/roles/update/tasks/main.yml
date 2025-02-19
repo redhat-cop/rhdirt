@@ -1,0 +1,30 @@
+---
+- name: Register Red Hat
+  community.general.redhat_subscription:
+    state: present
+    username: "{{ rhsm_username }}"
+    password: "{{ rhsm_password }}"
+    pool_ids:
+    - "{{ pool_id }}"
+  become: yes
+
+- name: Enable subscription-manager repository control
+  command: subscription-manager config --rhsm.manage_repos=1
+  become: yes
+
+- name: Enable Ansible Automation Platform Repository
+  community.general.rhsm_repository:
+    name: "{{ aap_repository }}" 
+  become: yes
+
+- name: Update system
+  ansible.builtin.yum:
+    name: '*'
+    state: latest
+  become: yes
+  register: sysreboot
+
+- name: Reboot
+  ansible.builtin.reboot:
+  become: yes
+  when: sysreboot.changed

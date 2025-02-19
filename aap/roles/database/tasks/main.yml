@@ -1,0 +1,12 @@
+---
+- name: Create new databases for Controller, Hub, and Catalog
+  community.postgresql.postgresql_db:
+    name: "{{ item }}"
+    state: present
+    login_user: "{{ db_instances[0].username }}"
+    login_password: "{{ db_instances[0].password }}"
+    login_host: "{{ db_instances[0].db_instance_identifier}}.{{ zone }}" 
+  loop:
+  - anscon 
+  - anshub
+  - anscat

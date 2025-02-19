@@ -16,14 +16,24 @@
       file: letsencrypt-stg-root-x1.pem 
     acme_directory: "{{ le_staging }}" 
     work_dir: "{{ playbook_dir }}"
+    domain_suffix: vipertest.dragonslair.dev
     domains: 
-    - aap.dragonslair.dev
-    - aac.dragonslair.dev
-    - aah.dragonslair.dev
-    - sso.dragonslair.dev
-    - asc.dragonslair.dev
+    - "aap.{{ domain_suffix }}"
+    - "aac.{{ domain_suffix }}"
+    - "aah.{{ domain_suffix }}"
+    - "sso.{{ domain_suffix }}"
+    - "asc.{{ domain_suffix }}"
+    common_name: "{{ domains[0] }}"
+    renew: False
+    account_key: "{{ aap_account_key }}"
 
   tasks:
+  - name: Populate Account Key if exists for consistency
+    ansible.builtin.copy:
+      content: "{{ account_key }}"
+      mode: '0600'
+      dest: "{{ work_dir }}/{{ item.dest }}"
+
   - name: Populate TLS key and certificate
     ansible.builtin.copy:
       content: "{{ item.content }}"
@@ -91,14 +101,14 @@
 
   - amazon.aws.route53:
       zone: dragonslair.dev 
-      record: "{{ dns_challenge.dns_record }}"
+      record: "{{ item.dns_record }}"
       type: TXT
       ttl: 60
       state: present
       wait: yes
       overwrite: true
       #For whatever reason, dns_value is a list with one item
-      value: "{{ dns_challenge.dns_value[0] }}"
+      value: "{{ item.dns_value[0] | regex_replace('^(.*)$', '\"\\1\"') }}"
     when: challenge is changed
     vars:
       dns_challenge: "{{ challenge.challenge_data_dns | dict2items(key_name='dns_record', value_name='dns_value') }}"
@@ -121,14 +131,14 @@
 
   - amazon.aws.route53:
       zone: dragonslair.dev 
-      record: "{{ dns_challenge.dns_record }}"
+      record: "{{ item.dns_record }}"
       type: TXT
       ttl: 60
       state: absent
       wait: yes
       overwrite: true
       #For whatever reason, dns_value is a list with one item
-      value: "{{ dns_challenge.dns_value[0] }}"
+      value: "{{ item.dns_value[0] | regex_replace('^(.*)$', '\"\\1\"') }}"
     when: challenge is changed
     vars:
       dns_challenge: "{{ challenge.challenge_data_dns | dict2items(key_name='dns_record', value_name='dns_value') }}"

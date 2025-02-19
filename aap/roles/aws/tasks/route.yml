@@ -1,0 +1,22 @@
+---
+- amazon.aws.ec2_vpc_subnet_info:
+    region: "{{ aws_region }}"
+    filters:
+      "tag:Env": "{{ env }}"
+  register: provisioned_subnets_results
+
+- name: Get all nat gateways with specific filters
+  amazon.aws.ec2_vpc_nat_gateway_info:
+    region: "{{ aws_region }}"
+    filters:
+      "tag:Env": "{{ env }}"
+  register: provisioned_nat_gateway_results
+
+- set_fact:
+    prov_subnets: "{{ provisioned_subnets_results.subnets }}"
+    prov_nat_gw: "{{ provisioned_nat_gateway_results.result }}"
+    cacheable: yes
+
+- set_fact:
+    subnet_ids: "{{ dict(prov_subnets | map(attribute='tags.Name') | zip(prov_subnets | map(attribute='subnet_id'))) }}"
+    cacheable: yes

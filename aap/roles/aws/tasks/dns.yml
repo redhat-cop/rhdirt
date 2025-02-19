@@ -1,0 +1,97 @@
+---
+- name: Get information about an instance
+  amazon.aws.rds_instance_info:
+    region: "{{ aws_region }}"
+  register: rds_results
+
+- name: Gather information about all instances
+  amazon.aws.ec2_instance_info:
+    region: "{{ aws_region }}"
+    filters:
+      "tag:Env": "{{ env }}"
+  register: ec2_results
+
+- set_fact:
+    provisioned_rds: "{{ rds_results.instances }}"
+    provisioned_ec2: "{{ ec2_results.instances }}"
+    cacheable: true
+  when: state == "present"
+
+- set_fact:
+    rds_addresses: "{{ dict(provisioned_rds | map(attribute='tags.Name') | zip(provisioned_rds | map(attribute='endpoint.address')))  }}"
+    ec2_ips: "{{ dict(provisioned_ec2 | map(attribute='tags.Name') | zip(provisioned_ec2 | map(attribute='public_ip_address')))  }}"
+    cacheable: true
+  when: state == "present"
+
+- name: Add or Remove RDS DNS Record
+  amazon.aws.route53:
+    state: "{{ state }}"
+    zone: "{{ zone }}"
+    record: "{{ item.db_instance_identifier }}.{{ zone }}"
+    type: CNAME
+    ttl: 7200
+    value: "{{ rds_addresses[item.db_instance_identifier] | ternary(rds_addresses[item.db_instance_identifier],omit) }}" 
+    wait: true
+  register: rds_dns_creation
+  when: state == "present"
+  loop: "{{ db_instances }}"
+  async: 600
+  poll: 0
+
+- name: Check on RDS DNS creation
+  async_status: 
+    jid: "{{ item.ansible_job_id }}"
+  register: rds_dns_creation_result
+  when: state == "present"
+  until: rds_dns_creation_result.finished
+  loop: "{{ rds_dns_creation.results }}"
+  retries: 60
+  delay: 10
+
+- name: Add/Remove EC2 DNS Record
+  amazon.aws.route53:
+    state: "{{ state }}"
+    zone: "{{ zone }}"
+    record: "{{ item.name }}.{{ zone }}"
+    type: A
+    ttl: 7200
+    value: "{{ ec2_ips[item.name] | ternary(ec2_ips[item.name],omit) }}" 
+    wait: true
+  register: ec2_dns_creation
+  when: state == "present"
+  loop: "{{ instances }}"
+  async: 600
+  poll: 0
+    
+- name: Check on EC2 DNS creation
+  async_status: 
+    jid: "{{ item.ansible_job_id }}"
+  register: ec2_dns_creation_result
+  when: state == "present"
+  until: ec2_dns_creation_result.finished
+  loop: "{{ ec2_dns_creation.results }}"
+  retries: 60
+  delay: 10
+
+- name: Remove EC2 DNS Record
+  amazon.aws.route53:
+    state: "{{ state }}"
+    zone: "{{ zone }}"
+    record: "{{ item.name }}.{{ zone }}"
+    type: A
+    ttl: 7200
+    value: "{{ ec2_ips[item.name] | ternary(ec2_ips[item.name],omit) }}" 
+    wait: true
+  loop: "{{ instances }}"
+  when: state == "absent"
+
+- name: Remove RDS DNS Record
+  amazon.aws.route53:
+    state: "{{ state }}"
+    zone: "{{ zone }}"
+    record: "{{ item.db_instance_identifier }}.{{ zone }}"
+    type: CNAME
+    ttl: 7200
+    wait: true
+  when: state == "absent"
+  loop: "{{ db_instances }}"

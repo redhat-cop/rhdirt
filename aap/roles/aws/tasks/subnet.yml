@@ -1,0 +1,22 @@
+---
+- amazon.aws.ec2_vpc_net_info:
+    region: "{{ aws_region }}"
+    filters:
+      "tag:Name": "{{ env_vpc }}"
+  register: vpc_name
+
+- set_fact:
+    vpc_id: "{{ vpc_name.vpcs | selectattr('tags.Name', '==', env_vpc) | map(attribute='vpc_id') | first }}"
+    cacheable: yes
+
+- name: create VPC subnets
+  ec2_vpc_subnet:
+    vpc_id: "{{ vpc_id }}"
+    state: "{{ state }}"
+    cidr: "{{ item.value.cidr }}"
+    az: "{{ item.value.az }}"
+    tags:
+      Name: "{{ item.key }}"
+      Env: "{{ env }}"
+    region: "{{ aws_region }}"
+  loop: "{{ vpc_subnets | dict2items }}"

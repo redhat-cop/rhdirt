@@ -5,7 +5,9 @@ all:
     zone: dragonslair.dev
     aws_access_key_id: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
     aws_secret_access_key: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
-    aws_region: us-east-2
+    aws_region: us-east-1
+    env_vpc: "{{ env }}_vpc"
+    env_bucket: "{{ env }}-artifacts-bucket"
     secrets: "{{ lookup('amazon.aws.aws_ssm','/' + env,region=aws_region,aws_access_key=aws_access_key_id,aws_secret_key=aws_secret_access_key,shortnames=true,bypath=true,recursive=true) }}"
     aap_platform_key: "{{ secrets.aap_platform_key }}"
     aap_platform_cert: "{{ secrets.aap_platform_cert }}"
@@ -18,6 +20,33 @@ all:
     win_domain: "ad.{{ zone }}"
     win_initial_password: "{{ secrets.win_initial_password }}"
     jks_password: "{{ win_initial_password }}" 
+    vpc_cidr_block: 10.10.0.0/16 
+    nat_gateway_subnet: public-a
+    vpc_subnets:
+      private-a:
+        cidr: 10.10.1.0/24
+        az: "{{ aws_region }}a"
+        internet_routable: false
+      public-a:
+        cidr: 10.10.2.0/24
+        az: "{{ aws_region }}a"
+        internet_routable: true
+      private-b:
+        cidr: 10.10.3.0/24
+        az: "{{ aws_region }}b"
+        internet_routable: false
+      public-b:
+        cidr: 10.10.4.0/24
+        az: "{{ aws_region }}b"
+        internet_routable: true
+      private-c:
+        cidr: 10.10.5.0/24
+        az: "{{ aws_region }}c"
+        internet_routable: false
+      public-c:
+        cidr: 10.10.6.0/24
+        az: "{{ aws_region }}c"
+        internet_routable: true
     security_groups:
     - name: rhel
       description: Red Hat Firewall Ports
@@ -27,6 +56,8 @@ all:
         - 22
         - 80
         - 443
+        - 8080
+        - 8443
         cidr_ip: 0.0.0.0/0
         rule_desc: Allow all SSH
     - name: windows 
@@ -65,8 +96,8 @@ all:
     instances:
     - name: aac
       instance_type: m5.xlarge
-      image_id: ami-092b43193629811af
-      vpc_subnet_id: subnet-56fd641a
+      image_name: "rhel_8_7"
+      vpc_subnet: public-a
       security_group: rhel
       volume_size: 100
       tags:
@@ -74,17 +105,53 @@ all:
         Role: aac
     - name: aah
       instance_type: m5.xlarge
-      image_id: ami-092b43193629811af
-      vpc_subnet_id: subnet-56fd641a
+      image_name: "rhel_8_7"
+      vpc_subnet: public-a
       security_group: rhel
       volume_size: 100
       tags:
         Environment: "{{ env }}"
         Role: aah
+    - name: asc
+      instance_type: m5.xlarge
+      image_name: "rhel_8_7"
+      vpc_subnet: public-a
+      security_group: rhel
+      volume_size: 100
+      tags:
+        Environment: "{{ env }}"
+        Role: asc
+    - name: sso
+      instance_type: m5.xlarge
+      image_name: "rhel_8_7"
+      vpc_subnet: public-a
+      security_group: rhel
+      volume_size: 100
+      tags:
+        Environment: "{{ env }}"
+        Role: sso
+    - name: idm
+      instance_type: m5.xlarge
+      image_name: "rhel_8_7"
+      vpc_subnet: public-a
+      security_group: rhel
+      volume_size: 100
+      tags:
+        Environment: "{{ env }}"
+        Role: idm
+    - name: sat
+      instance_type: d2.xlarge
+      image_name: "rhel_8_7"
+      vpc_subnet: public-a
+      security_group: rhel
+      volume_size: 100
+      tags:
+        Environment: "{{ env }}"
+        Role: sat
     - name: dc01
       instance_type: m5.xlarge
-      image_id: ami-0aea78c3dfdcbb8cd
-      vpc_subnet_id: subnet-56fd641a
+      image_name: "rhel_8_7"
+      vpc_subnet: public-a
       user_data: "{{ lookup('template', 'win_userdata.j2') }}"
       security_group: windows
       volume_size: 100
@@ -93,8 +160,8 @@ all:
         Role: dc
     - name: tomcat
       instance_type: m5.xlarge
-      image_id: ami-0aea78c3dfdcbb8cd
-      vpc_subnet_id: subnet-56fd641a
+      image_name: "rhel_8_7"
+      vpc_subnet: public-a
       user_data: "{{ lookup('template', 'win_userdata.j2') }}"
       security_group: windows
       volume_size: 100
@@ -104,10 +171,10 @@ all:
     db_instances:
     - db_instance_identifier: aapdb
       instance_type: db.t4g.xlarge
+      security_group: postgres
+      vpc_subnet: public-a
       username: "{{ secrets.db_username }}"
       password: "{{ secrets.db_password }}"
-      vpc_subnet_id: subnet-56fd641a
-      vpc_security_group_name: postgres
       allocated_storage: 100
   hosts:
     localhost:

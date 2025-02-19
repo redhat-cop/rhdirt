@@ -1,0 +1,59 @@
+---
+- amazon.aws.ec2_security_group_info:
+    region: "{{ aws_region }}"
+    filters:
+      group-name: "{{ security_groups | map(attribute='name') }}"
+  register: provisioned_security_groups_results
+
+- set_fact:
+    prov_sec_group: "{{ provisioned_security_groups_results.security_groups }}" 
+    cacheable: yes
+
+- set_fact:
+    security_group_ids: "{{ dict(prov_sec_group | map(attribute='group_name') | zip(prov_sec_group | map(attribute='group_id'))) }}"
+    cacheable: yes
+
+- name: Create RDS database
+  amazon.aws.rds_instance:
+    region: "{{ aws_region }}"
+    state: "{{ state }}"
+    engine: postgres
+    db_instance_identifier: "{{ item.db_instance_identifier }}"
+    instance_type: "{{ item.instance_type }}"
+    password: "{{ item.password }}"
+    username: "{{ item.username }}"
+    allocated_storage: "{{ item.allocated_storage }}"
+    db_subnet_group_name: db_subnet_group
+    vpc_security_group_ids: "{{ security_group_ids[item.security_group] }}"
+    skip_final_snapshot: true
+    tags:
+      Name: "{{ item.db_instance_identifier }}"
+      Env: "{{ env }}"
+  register: rds_creation
+  loop: "{{ db_instances }}"
+  async: 1000
+  poll: 0
+  when: state == 'present'
+
+- name: Check on RDS instance creation
+  async_status: 
+    jid: "{{ item.ansible_job_id }}"
+  register: rds_creation_result
+  until: rds_creation_result.finished
+  loop: "{{ rds_creation.results }}"
+  retries: 100
+  delay: 10
+  when: state == 'present'
+
+- name: Create RDS database
+  amazon.aws.rds_instance:
+    region: "{{ aws_region }}"
+    state: "{{ state }}"
+    db_instance_identifier: "{{ item.db_instance_identifier }}"
+    skip_final_snapshot: true
+    tags:
+      Name: "{{ item.db_instance_identifier }}"
+      Env: "{{ env }}"
+  register: rds_creation
+  when: state == 'absent'
+  loop: "{{ db_instances }}"

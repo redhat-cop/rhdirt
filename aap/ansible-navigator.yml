@@ -1,6 +1,3 @@
-# # cspell:ignore cmdline, workdir
-# You must `export LOGIC_REPO=/path/to/repo` to use this 
-# file.
 ---
 ansible-navigator:
   ansible:
@@ -24,6 +21,7 @@ ansible-navigator:
       - POOL_ID
       - WIN_INITIAL_PASSWORD
       - CONTROLLER_HOST
+      - CONTROLLER_URL
       - CONTROLLER_OAUTH_TOKEN
       - AAP_USERNAME
       - AAP_PASSWORD
@@ -31,9 +29,11 @@ ansible-navigator:
       - RH_REGISTRY_PASSWORD
       - RH_OFFLINE_TOKEN
     image: quay.io/hfenner/dirt:latest
+    pull:
+      policy: missing
   logging:
-    level: critical
     file: /dev/null
+    level: critical
   mode: stdout
   playbook-artifact:
-    enable: False
+    enable: false

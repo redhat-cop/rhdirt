@@ -12,6 +12,7 @@ collections:
   - ansible.windows
   - ansible.controller
   - community.postgresql
+  - infra.controller_configuration
   - name: hfenner.aap_utilities
     source: https://github.com/hfenner/aap_utilities.git
     type: git

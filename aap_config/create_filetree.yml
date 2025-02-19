@@ -1,0 +1,13 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    output_path: /home/ec2-user/aap_resources
+    controller_oauthtoken: "{{ lookup('ansible.builtin.env', 'AAP_TOKEN') }}"
+    controller_hostname: aap-controller.2v2hs.sandbox2869.opentlc.com
+    controller_validate_certs: false
+  
+  roles:
+  - infra.controller_configuration.filetree_create

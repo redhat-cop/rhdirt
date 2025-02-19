@@ -1,0 +1,22 @@
+---
+- amazon.aws.ec2_vpc_net_info:
+    region: "{{ aws_region }}"
+    filters:
+      "tag:Name": "{{ env_vpc }}"
+  register: provisioned_vpc_results
+
+- set_fact:
+    prov_vpc: "{{ provisioned_vpc_results.vpcs }}"
+    cacheable: yes
+
+- set_fact:
+    vpc_id: "{{ prov_vpc | selectattr('tags.Name', '==', env_vpc) | map(attribute='vpc_id') | first }}"
+    cacheable: yes
+
+- name: Create internet gateway
+  ec2_vpc_igw:
+    state: "{{ state }}"
+    vpc_id: "{{ vpc_id }}"
+    region: "{{ aws_region }}"
+    tags:
+      Env: "{{ env }}"

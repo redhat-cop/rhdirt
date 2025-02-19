@@ -5,13 +5,16 @@ all:
         localhost:
           ansible_connection: local
       vars: 
-        work_dir: "{{ playbook_dir }}"
+        work_dir: /tmp
         aap_setup_down_offline_token: "{{ rh_offline_token }}"
         aap_setup_down_version: 2.3
-        aap_setup_down_dest_dir: "{{ playbook_dir }}"
         aap_setup_down_type: setup 
-        aap_setup_rhel_version: 8
-        aap_setup_prep_working_dir: "{{ playbook_dir }}" 
+        aap_setup_rhel_version: "{{ ansible_distribution_major_version | default(8, true) }}"
+        aap_setup_down_dest_dir: "{{ aap_setup_working_dir | default('/var/tmp') }}"
+        aap_setup_prep_working_dir: /tmp
+        aap_setup_down_release: "ansible-automation-platform-{{ aap_setup_down_version }}-for-rhel-{{ aap_setup_rhel_version }}-x86_64-files"
+        aap_setup_down_token_url: "https://sso.redhat.com/auth/realms/redhat-external/protocol/openid-connect/token"
+        aap_setup_down_images_url: "https://api.access.redhat.com/management/v1/images/cset/{{ aap_setup_down_release }}"
         controller_hostname: aac.dragonslair.dev 
         controller_username: admin
         controller_password: "{{ aap_admin_password }}"
@@ -60,8 +63,12 @@ all:
             automationcatalog_pg_password: "{{ db_instances[0].password }}"
             automationcatalog_pg_sslmode: prefer
             sso_console_admin_password: "{{ aap_admin_password }}"
-            custom_ca_cert: "{{ playbook_dir }}/isrgx1_root_cert.crt"
-            web_server_ssl_key: "{{ playbook_dir }}/aap.dragonslair.dev.pem"
-            web_server_ssl_cert: "{{ playbook_dir }}/aap.dragonslair.dev.crt"
-            automationhub_ssl_key: "{{ playbook_dir }}/aap.dragonslair.dev.pem"
-            automationhub_ssl_cert: "{{ playbook_dir }}/aap.dragonslair.dev.crt"
+            sso_custom_keystore_file: "{{ work_dir }}/aap.dragonslair.dev.jks"
+            sso_keystore_password: "{{ jks_password }}"
+            custom_ca_cert: "{{ work_dir }}/isrgx1_root_cert.crt"
+            web_server_ssl_key: "{{ work_dir }}/aap.dragonslair.dev.pem"
+            web_server_ssl_cert: "{{ work_dir }}/aap.dragonslair.dev.crt"
+            automationhub_ssl_key: "{{ work_dir }}/aap.dragonslair.dev.pem"
+            automationhub_ssl_cert: "{{ work_dir }}/aap.dragonslair.dev.crt"
+            automationcatalog_ssl_key: "{{ work_dir }}/aap.dragonslair.dev.pem"
+            automationcatalog_ssl_cert: "{{ work_dir }}/aap.dragonslair.dev.crt"

@@ -1,0 +1,44 @@
+---
+- name: Playbook to create custom EE
+  hosts: bastion
+  remote_user: ec2-user
+  gather_facts: false
+  collections:
+    - infra.ee_utilities
+  vars:
+    # For controller configuration definition
+    ee_builder_dir_clean: false
+    ee_builder_dir: "."
+    ee_update_base_images: false
+    ee_prune_images: false
+    ee_reg_credential: Automation Hub Container Registry
+    ee_base_image: registry.redhat.io/ansible-automation-platform-24/ee-minimal-rhel9:latest
+    ee_pull_collections_from_hub: false
+    ee_registry_username: "{{ lookup('env', 'EE_USERNAME') }}"
+    ee_registry_password: "{{ lookup('env', 'EE_PASS') }}"
+    ee_registry_dest: quay.io/hfenner
+    ee_verbosity: 1
+    ee_list:
+      - name: ee_william
+        alt_name: William EE
+        tag: test
+        dependencies:
+          galaxy:
+            collections:
+              - name: awx.awx
+                version: 22.4.0
+              - infra.controller_configuration
+              - infra.ah_configuration
+        images:
+          base_image:
+            name: registry.redhat.io/ansible-automation-platform-24/ee-minimal-rhel9:latest
+        options:
+          package_manager_path: /usr/bin/microdnf
+        build_steps:
+          prepend_final:
+            - RUN whoami
+            - RUN cat /etc/os-release
+          append_final:
+            - RUN echo This is a post-install command!
+  roles:
+    - infra.ee_utilities.ee_builder
